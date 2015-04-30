@@ -14,7 +14,7 @@
           ports_adresses: /dev/ttyMI7
           synchro_needed: 1
           max_current: 25000
-          max_increment: 1000.0
+          max_increment: 100000.0
           max_desired_increment: 200.0
           card_indexes: 0
           enc_res: 4000.0
