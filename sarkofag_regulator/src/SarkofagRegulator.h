@@ -38,7 +38,6 @@
 #include <rtt/Component.hpp>
 #include <std_srvs/Empty.h>
 #include <ros/ros.h>
-#include <math.h>       /* pow */
 #include <string>
 
 class SarkofagRegulator : public RTT::TaskContext {
@@ -47,6 +46,7 @@ class SarkofagRegulator : public RTT::TaskContext {
   ~SarkofagRegulator();
 
   int doServo(double, int);
+  int doServo_cas(double, double, int);
   int doServo_friction_test(double, int);
   void reset();
 
@@ -55,6 +55,7 @@ class SarkofagRegulator : public RTT::TaskContext {
   void updateHook();
 
   RTT::InputPort<double> desired_position_;
+  RTT::InputPort<double> measured_position_;
   RTT::InputPort<double> deltaInc_in;
   RTT::InputPort<bool> synchro_state_in_;
 
@@ -63,6 +64,8 @@ class SarkofagRegulator : public RTT::TaskContext {
 
   double desired_position_increment_;
   double desired_position_old_, desired_position_new_;
+  double measured_position_old_, measured_position_new_;
+  double measured_increment_old_, measured_increment_new_;
   double deltaIncData;
 
   bool synchro_state_old_, synchro_state_new_;
@@ -76,6 +79,12 @@ class SarkofagRegulator : public RTT::TaskContext {
   double A_;
   double BB0_;
   double BB1_;
+  double KP_POS_;
+  double TI_POS_;
+  double TD_POS_;
+  double KP_INC_;
+  double TI_INC_;
+  double TD_INC_;
   bool current_mode_;
   double max_output_current_;
   double current_reg_kp_;
@@ -87,8 +96,8 @@ class SarkofagRegulator : public RTT::TaskContext {
 
   enum reg_type {
     irp6,
-    friction_test,
-    pos_inc
+    cascade,
+    friction_test
   } type;
 
   double position_increment_old;  // przedosatnio odczytany przyrost polozenie (delta y[k-2]
@@ -111,8 +120,25 @@ class SarkofagRegulator : public RTT::TaskContext {
   double delta_eint;  // przyrost calki uchybu
   double delta_eint_old;  // przyrost calki uchybu w poprzednim kroku
 
+  double position_err_new;  // e_pos[k]
+  double position_err_old;  // e_pos[k-1]
+  double position_err_very_old;  // e_pos[k-2]
+
+  double increment_err_new;  // e_inc[k]
+  double increment_err_old;  // e_inc[k-1]
+  double increment_err_very_old;  // e_inc[k-2]
+
+  double position_set_value_new;  // u_pos[k]
+  double position_set_value_old;  // u_pos[k-1]
+  double increment_set_value_new;  // u_inc[k]
+  double increment_set_value_old;  // u_inc[k-1]
+
   double output_value;
 
   double a_, b0_, b1_;
+  double kp_pos, Ti_pos, Td_pos;
+  double kp_inc, Ti_inc, Td_inc;
+  double r0_pos, r1_pos, r2_pos;
+  double r0_inc, r1_inc, r2_inc;
 };
 #endif  // SARKOFAGREGULATOR_H_

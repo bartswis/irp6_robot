@@ -1,0 +1,77 @@
+import("rtt_ros")
+ros.import("rtt_rosnode")
+ros.import("rtt_actionlib")
+ros.import("rtt_std_msgs")
+ros.import("rtt_sensor_msgs")
+ros.import("rtt_actionlib_msgs")
+ros.import("rtt_trajectory_msgs")
+ros.import("rtt_control_msgs")
+ros.import("rtt_cartesian_trajectory_msgs")
+ros.import("rtt_hi_msgs")
+ros.import("rtt_rospack")
+
+ros.import("conman")
+ros.import("rtt_conman_msgs")
+ros.import("conman_ros")
+ros.import("hardware_interface")
+ros.import("sarkofag_regulator")
+ros.import("motor_state_export")
+ros.import("oro_joint_state_publisher")
+ros.import("internal_space_spline_trajectory_action")
+ros.import("internal_space_spline_trajectory_generator")
+ros.import("sarkofag_kinematic")
+ros.import("controller_common")
+ros.import("port_operations")
+
+
+
+runScript( ros.find("sarkofag_bringup") + "/config/load-scheme-and-hi.ops")
+
+
+// Motors Regulators
+
+
+loadComponent("SarkofagRegulator","SarkofagRegulator")
+SarkofagRegulator.loadService("rosparam")
+SarkofagRegulator.rosparam.getAll()
+SarkofagRegulator.configure()
+
+loadComponent("MotorStateExport","MotorStateExport")
+MotorStateExport.loadService("rosparam")
+MotorStateExport.rosparam.getAll()
+MotorStateExport.configure()
+
+
+runScript( ros.find("sarkofag_bringup") + "/config/sark-inside-pre-add-scheme-peer.ops")
+
+connect("MotorStateExport.MotorPositionIn","SarkofagHardwareInterface.MotorPosition_sarkofag", ConnPolicy())
+connect("MotorStateExport.MotorIncrementIn","SarkofagHardwareInterface.MotorIncrement_sarkofag", ConnPolicy())
+connect("MotorStateExport.MotorCurrentIn","SarkofagHardwareInterface.MotorCurrent_sarkofag", ConnPolicy())
+connect("MotorStateExport.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
+
+
+addPeer("SarkofagScheme", "SarkofagHardwareInterface")
+
+runScript( ros.find("sarkofag_bringup") + "/config/sark-inside-add-scheme-peer.ops")
+
+addPeer("SarkofagScheme", "MotorStateExport");
+
+
+SarkofagScheme.addBlock("SarkofagHardwareInterface");
+
+runScript( ros.find("sarkofag_bringup") + "/config/sark-inside-add-scheme-block.ops")
+
+SarkofagScheme.addBlock("MotorStateExport")
+SarkofagScheme.latchConnections("SarkofagHardwareInterface", "MotorStateExport", true);
+
+
+runScript( ros.find("sarkofag_bringup") + "/config/sark-inside-pre-start.ops")
+
+SarkofagScheme.start()
+
+runScript( ros.find("sarkofag_bringup") + "/config/sark-inside-start.ops")
+
+MotorStateExport.start()
+SarkofagHardwareInterface.start()
+
+

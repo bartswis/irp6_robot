@@ -50,10 +50,10 @@ runScript( ros.find("irp6_bringup") + "/config/irp6-p-inside-pre-add-scheme-peer
 runScript( ros.find("irp6_bringup") + "/config/irp6-ot-inside-pre-add-scheme-peer.ops")
 runScript( ros.find("irp6_bringup") + "/config/conv-inside-pre-add-scheme-peer.ops")
 
-connect("MotorStateExport.MotorPositionIn","SarkofagHardwareInterface.MotorPosition_irp6pm_2", ConnPolicy())
-connect("MotorStateExport.MotorIncrementIn","SarkofagHardwareInterface.MotorIncrement_irp6pm_2", ConnPolicy())
-connect("MotorStateExport.MotorCurrentIn","SarkofagHardwareInterface.MotorCurrent_irp6pm_2", ConnPolicy())
-connect("MotorStateExport.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
+connect("MotorStateExport.MotorPositionIn","Irp6HardwareInterface.MotorPosition_irp6pm_1", ConnPolicy())
+connect("MotorStateExport.MotorIncrementIn","Irp6HardwareInterface.MotorIncrement_irp6pm_1", ConnPolicy())
+connect("MotorStateExport.MotorCurrentIn","Irp6HardwareInterface.MotorCurrent_irp6pm_1", ConnPolicy())
+connect("MotorStateExport.SynchroStateIn","Irp6HardwareInterface.IsSynchronised", ConnPolicy())
 
 
 
@@ -99,4 +99,5 @@ runScript( ros.find("irp6_bringup") + "/config/irp6-ot-inside-start.ops")
 runScript( ros.find("irp6_bringup") + "/config/conv-inside-start.ops")
 
 Irp6HardwareInterface.start()
+MotorStateExport.start()
 PortDoubleToFloat64_1.start()

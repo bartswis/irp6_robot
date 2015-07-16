@@ -28,6 +28,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# WSPOLPRACUJE z sark-hardware.launch
+
+
+
 import rospy
 import tf
 import actionlib
@@ -47,39 +51,34 @@ import PyKDL
 import tf_conversions.posemath as pm
 
 if __name__ == '__main__':
-  rospy.init_node('multi_trajectory')
-  rospy.wait_for_service('/controller_manager/switch_controller')
-  conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
+  rospy.init_node('sark_multi_trajectory')
   
-  #
-  # Deactivate all generators
-  #
+  if len(sys.argv) > 1 and sys.argv[1]=="csn":
+      rospy.wait_for_service('/sarkofag_manager/switch_controller')
+      conmanSwitch = rospy.ServiceProxy('/sarkofag_manager/switch_controller', SwitchController)
+  else :
+    rospy.wait_for_service('/controller_manager/switch_controller')
+    conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
   
-  conmanSwitch([], ['SplineTrajectoryGeneratorMotor','SplineTrajectoryGeneratorJoint','PoseInt','ForceControlLaw','ForceTransformation'], True)
+  conmanSwitch(['SarkofagSplineTrajectoryGeneratorJoint'], [], True)
   
-  #
-  # Motor coordinates motion
-  #
-  
-  conmanSwitch(['SplineTrajectoryGeneratorMotor'], [], True)
-  
-  motor_client = actionlib.SimpleActionClient('/sarkofag_arm/spline_trajectory_action_motor', FollowJointTrajectoryAction)
-  motor_client.wait_for_server()
+  joint_client = actionlib.SimpleActionClient('/sarkofag/spline_trajectory_action_joint', FollowJointTrajectoryAction)
+  joint_client.wait_for_server()
 
   print 'server ok'
 
   goal = FollowJointTrajectoryGoal()
   goal.trajectory.joint_names = ['joint1']
-  goal.trajectory.points.append(JointTrajectoryPoint([0.0], [0.0], [], [], rospy.Duration(10.0)))
+  goal.trajectory.points.append(JointTrajectoryPoint([1.57], [0.0], [], [], rospy.Duration(10.0)))
+  goal.trajectory.points.append(JointTrajectoryPoint([0.78], [0.0], [], [], rospy.Duration(10.0)))
   goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(0.2)
 
-  motor_client.send_goal(goal)
+  joint_client.send_goal(goal)
 
-  motor_client.wait_for_result()
-  command_result = motor_client.get_result()
-  
-  conmanSwitch([], ['SplineTrajectoryGeneratorMotor'], True)
-    
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+     
+  conmanSwitch([], ['SarkofagSplineTrajectoryGeneratorJoint'], True)
   
   print 'finish'
   
