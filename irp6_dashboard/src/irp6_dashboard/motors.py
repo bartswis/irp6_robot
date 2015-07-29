@@ -41,8 +41,9 @@ import rospy
 from rqt_robot_dashboard.widgets import MenuDashWidget
 import std_srvs.srv
 
+from std_msgs.msg import *
 from irpos import *
-# from naoqi_msgs.msg import BodyPoseAction, BodyPoseGoal
+
 
 
 class Motors(MenuDashWidget):
@@ -66,84 +67,106 @@ class Motors(MenuDashWidget):
         icons = [ok_icon, warn_icon, err_icon, stale_icon]
 
         super(Motors, self).__init__('Motors', icons)
-        self.update_state(3)
+        
+        self.synchronise_action = self.add_action('Synchronise', self.synchronise)
+        self.irp6p_move_to_synchro_pos_action = self.add_action('Irp6p move to synchro pos', self.irp6p_move_to_synchro_pos)
+        self.irp6ot_move_to_synchro_pos_action = self.add_action('Irp6ot move to synchro pos', self.irp6ot_move_to_synchro_pos)
+        self.motion_in_progress_state = False
+        self.motion_in_progress_state_previous = False
+        self.synchro_in_progress_state = False
+        self.synchro_in_progress_state_previous = False
 
-        self.add_action('Motion one', self.on_motion_one)
-        self.add_action('Init pose', self.on_init_pose)
-        self.add_action('Sit down && remove stiffness', self.on_sit_down)
-        self.add_action('Remove stiffness immediately', self.on_remove_stiffness)
-
-        # clients for controlling the robot
-        # self.bodyPoseClient = actionlib.SimpleActionClient('body_pose', BodyPoseAction)
-        # self.stiffnessEnableClient = rospy.ServiceProxy("body_stiffness/enable", std_srvs.srv.Empty)
-        # self.stiffnessDisableClient = rospy.ServiceProxy("body_stiffness/disable", std_srvs.srv.Empty)
-
-        self.irpos = IRPOS("", "Irp6p", 6)
-
+        
     def set_ok(self):
         self.update_state(0)
+
 
     def set_warn(self):
         self.update_state(1)
 
+
     def set_error(self):
         self.update_state(2)
 
+
     def set_stale(self):
         self.update_state(3)
-      
-    def on_init_pose(self):
-        self.stiffnessEnableClient.call()
-        self.bodyPoseClient.send_goal_and_wait(BodyPoseGoal(pose_name = 'init'))
 
-    def on_motion_one(self):
-        QMessageBox.information(self, 'Caution', 
-                     'Irpos motion one', QMessageBox.Ok)
 
-        motor_trajectory = [JointTrajectoryPoint([0.4, -1.5418065817051163, 0.0, 1.57, 1.57, -2.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(10.0)), JointTrajectoryPoint([10.0, 10.0, 0.0, 10.57, 10.57, -20.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(12.0))]
-        self.irpos.move_along_motor_trajectory(motor_trajectory)
+    def enable_post_synchro_actions(self):
+        self.irp6p_move_to_synchro_pos_action.setDisabled(False)
+        self.irp6ot_move_to_synchro_pos_action.setDisabled(False)
+        self.synchronise_action.setDisabled(True)
+         
+         
+    def enable_pre_synchro_actions(self):
+        self.irp6p_move_to_synchro_pos_action.setDisabled(True)
+        self.irp6ot_move_to_synchro_pos_action.setDisabled(True)
+        self.synchronise_action.setDisabled(False)
 
-        joint_trajectory = [JointTrajectoryPoint([0.4, -1.5418065817051163, 0.0, 1.5, 1.57, -2.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(3.0)),JointTrajectoryPoint([0.0, -1.5418065817051163, 0.0, 1.5, 1.57, -2.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(6.0))]
-        self.irpos.move_along_joint_trajectory(joint_trajectory)
 
-        rot = PyKDL.Frame(PyKDL.Rotation.EulerZYZ(0.0, 1.4, 3.14), PyKDL.Vector(0.705438961242, -0.1208864692291, 1.18029263241))
-        rot2 = PyKDL.Frame(PyKDL.Rotation.EulerZYZ(0.3, 1.4, 3.14), PyKDL.Vector(0.705438961242, -0.1208864692291, 1.181029263241))
-        cartesianTrajectory = [CartesianTrajectoryPoint(rospy.Duration(3.0), Pose(Point(0.705438961242, -0.1208864692291, 1.181029263241), Quaternion(0.675351045979, 0.0892025112399, 0.698321120995, 0.219753244928)), Twist()), CartesianTrajectoryPoint(rospy.Duration(6.0), pm.toMsg(rot), Twist()),CartesianTrajectoryPoint(rospy.Duration(9.0), pm.toMsg(rot2), Twist())]
-        self.irpos.move_along_cartesian_trajectory(cartesianTrajectory)
+    def disable_all_actions(self):
+        self.irp6p_move_to_synchro_pos_action.setDisabled(True)
+        self.irp6ot_move_to_synchro_pos_action.setDisabled(True)
+        self.synchronise_action.setDisabled(True)
 
-        toolParams = Pose(Point(0.0, 0.0, 0.0), Quaternion(0.0, 0.0, 0.0, 1.0))
-        self.irpos.set_tool_geometry_params(toolParams)
 
-        rot = PyKDL.Frame(PyKDL.Rotation.EulerZYZ(0.0, 1.4, 3.14), PyKDL.Vector(0.705438961242, -0.1208864692291, 1.181029263241))
-        cartesianTrajectory = [CartesianTrajectoryPoint(rospy.Duration(3.0), Pose(Point(0.705438961242, -0.1208864692291, 1.181029263241), Quaternion(0.675351045979, 0.0892025112399, 0.698321120995, 0.219753244928)), Twist()),
-        CartesianTrajectoryPoint(rospy.Duration(6.0), pm.toMsg(rot), Twist()),CartesianTrajectoryPoint(rospy.Duration(9.0), Pose(Point(0.705438961242, -0.1208864692291, 1.181029263241), Quaternion(0.63691, 0.096783, 0.75634, -0.11369)), Twist())]
-        self.irpos.move_along_cartesian_trajectory(cartesianTrajectory)
+    def synchronise(self):
+        pub = rospy.Publisher('/hardware_interface/do_synchro_in', std_msgs.msg.Bool, queue_size=0)
+        rospy.sleep(0.5)
+        goal = std_msgs.msg.Bool()
+        goal.data = True
+        pub.publish(goal)
+        self.synchro_in_progress_state = True
 
-        toolParams = Pose(Point(0.0, 0.0, 0.25), Quaternion(0.0, 0.0, 0.0, 1.0))
-        self.irpos.set_tool_geometry_params(toolParams)
 
-        print "Irp6p 'multi_trajectory' test completed"
+    def irp6p_done_callback(self,state, result):
+        self.conmanSwitch([], ['Irp6pmSplineTrajectoryGeneratorMotor','Irp6pmSplineTrajectoryGeneratorJoint','Irp6pmPoseInt','Irp6pmForceControlLaw','Irp6pmForceTransformation'], True)
+        self.motion_in_progress_state = False
 
-    def on_sit_down(self):
-        self.bodyPoseClient.send_goal_and_wait(BodyPoseGoal(pose_name = 'crouch'))
-        state = self.bodyPoseClient.get_state()
-        if state == actionlib.GoalStatus.SUCCEEDED:
-            self.stiffnessDisableClient.call()
-        else:
-            QMessageBox(self, 'Error', 'crouch pose did not succeed: %s - cannot remove stiffness' % self.bodyPoseClient.get_goal_status_text())
-            rospy.logerror("crouch pose did not succeed: %s", self.bodyPoseClient.get_goal_status_text())
 
-    def on_remove_stiffness(self):
-      reply = QMessageBox.question(self, 'Caution', 
-                     'Robot may fall. Continue to remove stiffness?', QMessageBox.Yes, QMessageBox.No)
-      if(reply == QMessageBox.Yes):
-          self.stiffnessDisableClient.call()
+    def irp6ot_done_callback(self,state, result):
+        self.conmanSwitch([], ['Irp6otmSplineTrajectoryGeneratorMotor','Irp6otmSplineTrajectoryGeneratorJoint','Irp6otmPoseInt','Irp6otmForceControlLaw','Irp6otmForceTransformation'], True)
+        self.motion_in_progress_state = False
 
-    def on_halt_motors(self, evt):
-        halt = rospy.ServiceProxy("pr2_etherCAT/halt_motors", std_srvs.srv.Empty)
-        
-        try:
-            halt()
-        except rospy.ServiceException, e:
-            QMessageBox(self, 'Error',
-                     'Failed to halt the motors: service call failed with error: %s'%(e))
+
+    def irp6p_move_to_synchro_pos(self):
+        rospy.wait_for_service('/controller_manager/switch_controller')
+        self.conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
+        self.conmanSwitch([], ['Irp6pmSplineTrajectoryGeneratorMotor','Irp6pmSplineTrajectoryGeneratorJoint','Irp6pmPoseInt','Irp6pmForceControlLaw','Irp6pmForceTransformation'], True)
+  
+        self.conmanSwitch(['Irp6pmSplineTrajectoryGeneratorMotor'], [], True)
+    
+        self.client = actionlib.SimpleActionClient('/irp6p_arm/spline_trajectory_action_motor', FollowJointTrajectoryAction)
+        self.client.wait_for_server()
+
+        goal = FollowJointTrajectoryGoal()
+        goal.trajectory.joint_names = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        goal.trajectory.points.append(JointTrajectoryPoint([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(10.0)))
+        goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(0.2)
+
+        self.client.send_goal(goal, self.irp6p_done_callback)
+
+        self.motion_in_progress_state = True
+
+
+    def irp6ot_move_to_synchro_pos(self):
+        rospy.wait_for_service('/controller_manager/switch_controller')
+        self.conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
+        self.conmanSwitch([], ['Irp6otmSplineTrajectoryGeneratorMotor','Irp6otmSplineTrajectoryGeneratorJoint','Irp6otmPoseInt','Irp6otmForceControlLaw','Irp6otmForceTransformation'], True)
+  
+        self.conmanSwitch(['Irp6otmSplineTrajectoryGeneratorMotor'], [], True)
+    
+        self.client = actionlib.SimpleActionClient('/irp6ot_arm/spline_trajectory_action_motor', FollowJointTrajectoryAction)
+        self.client.wait_for_server()
+
+        goal = FollowJointTrajectoryGoal()
+        goal.trajectory.joint_names = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6', 'joint7']
+        goal.trajectory.points.append(JointTrajectoryPoint([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [], [], rospy.Duration(10.0)))
+        goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(0.2)
+
+        self.client.send_goal(goal, self.irp6ot_done_callback)
+  
+        self.motion_in_progress_state = True
+
+

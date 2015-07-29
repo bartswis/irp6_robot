@@ -57,7 +57,9 @@ HardwareInterface::HardwareInterface(const std::string& name)
       error_msg_hardware_panic_(0) {
 
   this->ports()->addPort("EmergencyStopIn", port_emergency_stop_);
+  this->ports()->addPort("DoSynchroIn", port_do_synchro_);
   this->ports()->addPort("IsSynchronised", port_is_synchronised_);
+  this->ports()->addPort("IsHardwarePanic", port_is_hardware_panic_);
 
   this->addProperty("active_motors", active_motors_).doc("");
   this->addProperty("hardware_hostname", hardware_hostname_).doc("");
@@ -322,17 +324,17 @@ bool HardwareInterface::startHook() {
       if (!hi_->robot_synchronized()) {
         port_is_synchronised_.write(false);
         RTT::log(RTT::Info) << "Robot not synchronized" << RTT::endlog();
+        synchro_start_iter_ = 500;
+        synchro_stop_iter_ = 1000;
+        synchro_state_ = MOVE_TO_SYNCHRO_AREA;
+        synchro_drive_ = 0;
         if (auto_synchronize_) {
           RTT::log(RTT::Info) << "Auto synchronize" << RTT::endlog();
-          state_ = SERVOING;
-          synchro_start_iter_ = 500;
-          synchro_stop_iter_ = 1000;
-          synchro_state_ = MOVE_TO_SYNCHRO_AREA;
-          synchro_drive_ = 0;
           std::cout << "Auto synchronize" << std::endl;
           state_ = PRE_SYNCHRONIZING;
-
         } else {
+          RTT::log(RTT::Info) << "Manual synchronize" << RTT::endlog();
+          std::cout << "Manual synchronize" << std::endl;
           state_ = NOT_SYNCHRONIZED;
         }
       } else {
@@ -392,18 +394,34 @@ void HardwareInterface::updateHook() {
         hi_->set_pwm(i, pwm_or_current_[i]);
       }
     }
-    hi_->write_read_hardware(rwh_nsec_, timeouts_to_print_);
+
+    bool hi_status = hi_->write_read_hardware(rwh_nsec_, timeouts_to_print_);
+    if (hi_status == 0) {
+      port_is_hardware_panic_.write(true);
+    } else {
+      port_is_hardware_panic_.write(false);
+    }
     for (int i = 0; i < number_of_drives_; i++) {
       motor_position_(i) = static_cast<double>(hi_->get_position(i))
           * ((2.0 * M_PI) / enc_res_[i]);
     }
   } else {
     test_mode_sleep();
+    port_is_hardware_panic_.write(false);
   }
 
   switch (state_) {
-    case NOT_SYNCHRONIZED:
-
+    case NOT_SYNCHRONIZED: {
+      std_msgs::Bool do_synchro;
+      if (port_do_synchro_.read(do_synchro) == RTT::NewData) {
+        if (do_synchro.data) {
+          if (!test_mode_) {
+            state_ = PRE_SYNCHRONIZING;
+          }
+          std::cout << "NOT_SYNCHRONIZED" << std::endl;
+        }
+      }
+    }
       break;
 
     case PRE_SERVOING:
@@ -553,7 +571,8 @@ void HardwareInterface::updateHook() {
       if (!test_mode_) {
         hi_->set_hardware_panic();
       } else if (error_msg_hardware_panic_ == 0) {
-        std::cout << RED << std::endl << "[error] hardware panic" << RESET << std::endl << std::endl;
+        std::cout << RED << std::endl << "[error] hardware panic" << RESET
+                  << std::endl << std::endl;
         error_msg_hardware_panic_++;
       }
     }
