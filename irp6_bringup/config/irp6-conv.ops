@@ -28,6 +28,7 @@ ros.import("irp6_haptic")
 //-- Two manipulators and grippers
 //------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 
 runScript( ros.find("irp6_bringup") + "/config/load-scheme-and-hi.ops")
 
@@ -89,5 +90,11 @@ runScript( ros.find("irp6_bringup") + "/config/irp6-ot-inside-start.ops")
 runScript( ros.find("irp6_bringup") + "/config/conv-inside-start.ops")
 
 runScript( ros.find("irp6_bringup") + "/config/start-hi.ops")
+=======
+runScript( ros.find("irp6_bringup") + "/config/irp6-p-inside.ops")
+runScript( ros.find("irp6_bringup") + "/config/irp6-ot-inside.ops")
+runScript( ros.find("irp6_bringup") + "/config/conv-inside.ops")
+>>>>>>> a226e553b6a2456acff45b839769bf1b96e4411d
 PortDoubleToFloat64_1.start()
 
+runScript( ros.find("irp6_bringup") + "/config/haptic-inside.ops")
