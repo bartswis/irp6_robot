@@ -53,12 +53,8 @@ import tf_conversions.posemath as pm
 if __name__ == '__main__':
   rospy.init_node('sark_multi_trajectory')
   
-  if len(sys.argv) > 1 and sys.argv[1]=="csn":
-      rospy.wait_for_service('/sarkofag_manager/switch_controller')
-      conmanSwitch = rospy.ServiceProxy('/sarkofag_manager/switch_controller', SwitchController)
-  else :
-    rospy.wait_for_service('/controller_manager/switch_controller')
-    conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
+  rospy.wait_for_service('/sarkofag_manager/switch_controller')
+  conmanSwitch = rospy.ServiceProxy('/sarkofag_manager/switch_controller', SwitchController)
   
   conmanSwitch(['SarkofagSplineTrajectoryGeneratorJoint'], [], True)
   
@@ -69,9 +65,105 @@ if __name__ == '__main__':
 
   goal = FollowJointTrajectoryGoal()
   goal.trajectory.joint_names = ['joint1']
-  goal.trajectory.points.append(JointTrajectoryPoint([1.57], [0.0], [], [], rospy.Duration(10.0)))
-  goal.trajectory.points.append(JointTrajectoryPoint([0.78], [0.0], [], [], rospy.Duration(10.0)))
-  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(0.2)
+  goal.trajectory.points.append(JointTrajectoryPoint([2.0], [0.0], [], [], rospy.Duration(9.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'I'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([-1.0], [0.0], [], [], rospy.Duration(14.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'II'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([0.0], [0.0], [], [], rospy.Duration(9.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+     
+     
+  print 'III'
+
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([2.0], [0.0], [], [], rospy.Duration(4.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'IV'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([-1.0], [0.0], [], [], rospy.Duration(9.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'V'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([0.0], [0.0], [], [], rospy.Duration(4.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'VI'
+
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([0.5], [0.0], [], [], rospy.Duration(4.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'VII'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([-0.25], [0.0], [], [], rospy.Duration(9.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
+
+  joint_client.send_goal(goal)
+
+  joint_client.wait_for_result()
+  command_result = joint_client.get_result()
+  
+  print 'VIII'
+  
+  goal = FollowJointTrajectoryGoal()
+  goal.trajectory.joint_names = ['joint1']
+  goal.trajectory.points.append(JointTrajectoryPoint([0.0], [0.0], [], [], rospy.Duration(4.0)))
+  goal.trajectory.header.stamp = rospy.get_rostime() + rospy.Duration(1.0)
 
   joint_client.send_goal(goal)
 

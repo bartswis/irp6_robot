@@ -3,15 +3,15 @@
  #
  # DO NOT USE THAT FILE DIRECTLY.
  #
- # Use sark-hardware.launch or sark-nohardware.launch 
+ # Use conv-hardware.launch or conv-nohardware.launch 
  #
  
   <param name="robot_description" command="$(find xacro)/xacro.py '$(find irp6_description)/robots/irp6pboth.urdf.xacro'" />
   
-  <include file="$(find sarkofag_bringup)/launch/sark-inside.launch" ns="SARK_OROCOS_ROBOT">
+  <include file="$(find sarkofag_bringup)/launch/sark-inside.launch" ns="CONV_OROCOS_ROBOT">
   </include>
   
-  <group ns="SARK_OROCOS_ROBOT">
+  <group ns="CONV_OROCOS_ROBOT">
     <rosparam>
       SarkofagHardwareInterface:
         auto_synchronize: true

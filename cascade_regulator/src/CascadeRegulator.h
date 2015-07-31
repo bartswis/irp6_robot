@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOTORSTATEEXPORT_H_
-#define MOTORSTATEEXPORT_H_
+#ifndef CASCADEREGULATOR_H_
+#define CASCADEREGULATOR_H_
 
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
@@ -38,34 +38,33 @@
 #include <rtt/Component.hpp>
 #include <std_srvs/Empty.h>
 #include <ros/ros.h>
-
-#include <fstream> // NOLINT
 #include <string>
-#include <ctime>
 
-class MotorStateExport : public RTT::TaskContext {
+class CascadeRegulator : public RTT::TaskContext {
  public:
-  explicit MotorStateExport(const std::string& name);
-  ~MotorStateExport();
+  explicit CascadeRegulator(const std::string& name);
+  ~CascadeRegulator();
 
+  int doServo(double, int);
+  int doServo_cas(double, double, int);
   void reset();
 
  private:
   bool configureHook();
   void updateHook();
-  void write();
 
-  RTT::InputPort<double> port_desired_position_;
-  RTT::InputPort<double> port_motor_position_;
-  RTT::InputPort<double> port_motor_increment_;
-  RTT::InputPort<double> port_motor_current_;
-
+  RTT::InputPort<double> desired_position_;
+  RTT::InputPort<double> measured_position_;
+  RTT::InputPort<double> deltaInc_in;
   RTT::InputPort<bool> synchro_state_in_;
 
-  double desiredData;
-  double positionData;
-  double incrementData;
-  double currentData;
+  RTT::OutputPort<double> computedPwm_out;
+  RTT::OutputPort<bool> emergency_stop_out_;
+
+  double desired_position_increment_;
+  double desired_position_old_, desired_position_new_;
+  double measured_position_old_, measured_position_new_;
+  double measured_increment_old_, measured_increment_new_;
 
   bool synchro_state_old_, synchro_state_new_;
 
@@ -74,11 +73,55 @@ class MotorStateExport : public RTT::TaskContext {
 
   // Properties
   int reg_number_;
-  bool pre_syn_export_;
-  std::string filename_;
   bool debug_;
+  double KP_POS_;
+  double TI_POS_;
+  double TD_POS_;
+  double KP_INC_;
+  double TI_INC_;
+  double TD_INC_;
+  bool current_mode_;
+  double max_output_current_;
+  double current_reg_kp_;
+  double max_desired_increment_;
+  double enc_res_;
 
-  std::ofstream file;
+  double position_err_new;  // e_pos[k]
+  double position_err_old;  // e_pos[k-1]
+  double position_err_very_old;  // e_pos[k-2]
+
+  double increment_err_new;  // e_inc[k]
+  double increment_err_old;  // e_inc[k-1]
+  double increment_err_very_old;  // e_inc[k-2]
+
+  double position_set_value_new;  // u_pos[k]
+  double position_set_value_old;  // u_pos[k-1]
+  double increment_set_value_new;  // u_inc[k]
+  double increment_set_value_old;  // u_inc[k-1]
+
+  double output_value;  // y[k];
+
+  double kp_pos, Ti_pos, Td_pos;
+  double kp_inc, Ti_inc, Td_inc;
+  double r0_pos, r1_pos, r2_pos;
+  double r0_inc, r1_inc, r2_inc;
+
+  double A_;
+  double BB0_;
+  double BB1_;
+  double eint_dif_;
+
+  double position_increment_old;
+  double position_increment_new;
+  double step_old_pulse;
+  double step_new;
+  double step_old;
+  double set_value_new;
+  double set_value_old;
+  double set_value_very_old;
+  double delta_eint;
+  double delta_eint_old;
+
+  double a_, b0_, b1_;
 };
-
-#endif  // MOTORSTATEEXPORT_H_
+#endif  // CASCADEREGULATOR_H_

@@ -29,102 +29,72 @@
  */
 
 #include <string>
-#include "MotorStateExport.h"
 #include "../../hardware_interface/src/string_colors.h"
+#include "Logger.h"
 
 const int MAX_PWM = 190;
 
-MotorStateExport::MotorStateExport(const std::string& name)
-    : TaskContext(name),
-      port_desired_position_("DesiredPositionIn"),
-      port_motor_position_("MotorPositionIn"),
-      port_motor_increment_("MotorIncrementIn"),
-      port_motor_current_("MotorCurrentIn"),
-      synchro_state_in_("SynchroStateIn"),
-      desiredData(0.0),
-      positionData(0.0),
-      incrementData(0.0),
-      currentData(0.0) {
-
+Logger::Logger(const std::string& name)
+: TaskContext(name),
+  port_desired_position_("DesiredPositionIn"),
+  port_motor_position_("MotorPositionIn"),
+  port_motor_increment_("MotorIncrementIn"),
+  port_motor_current_("MotorCurrentIn"),
+  hardware_panic_in_("HardwarePanicIn"),
+  desiredData(0.0),
+  positionData(0.0),
+  incrementData(0.0),
+  currentData(0.0),
+  log(0),
+  writed(false) {
   this->addEventPort(port_desired_position_).doc("");
   this->addPort(port_motor_position_).doc("");
   this->addPort(port_motor_increment_).doc("");
   this->addPort(port_motor_current_).doc("");
 
-  this->addPort(synchro_state_in_).doc("Synchro State from HardwareInterface");
+  this->addPort(hardware_panic_in_).doc("Hardware Panic from HardwareInterface");
 
   this->addProperty("reg_number", reg_number_).doc("");
   this->addProperty("debug", debug_).doc("");
-  this->addProperty("pre_syn_export", pre_syn_export_).doc("");
   this->addProperty("filename", filename_).doc("");
+  this->addProperty("max_log", max_log_).doc("");
 }
 
-MotorStateExport::~MotorStateExport() {
-  file.close();
+Logger::~Logger() {
+  write();
 }
 
-bool MotorStateExport::configureHook() {
+bool Logger::configureHook() {
   reset();
 
-  char cCurrentPath[FILENAME_MAX];
-
-  if (!getcwd(cCurrentPath, sizeof(cCurrentPath))) {
-    return errno;
-  }
-
-  cCurrentPath[sizeof(cCurrentPath) - 1] = '\0';
-
-  time_t now = time(0);
-  struct tm newtime;
-  char buf[80];
-  localtime_r(&now, &newtime);
-  strftime(buf, sizeof(buf), "_%Y-%m-%d_%X", &newtime);
-
-  std::string filename = std::string(cCurrentPath);
-  int ros = filename.find(".ros");
-  filename = filename.erase(ros) + filename_ + std::string(buf);
-
-  file.open((filename + ".csv").c_str());
-
-  file << reg_number_ << "_time;";
-  file << reg_number_ << "_desired;";
-  file << reg_number_ << "_position;";
-  file << reg_number_ << "_increment;";
-  file << reg_number_ << "_current;";
-
-  file << std::endl;
+  buffer.resize(max_log_);
+  hardware_panic_old_ = false;
 
   return true;
 }
 
-void MotorStateExport::updateHook() {
-  if (RTT::NewData == synchro_state_in_.read(synchro_state_new_)) {
-    if (synchro_state_new_ != synchro_state_old_) {
-      synchro_state_old_ = synchro_state_new_;
+void Logger::updateHook() {
+  if (RTT::NewData == hardware_panic_in_.read(hardware_panic_new_)) {
+    if (hardware_panic_new_ != hardware_panic_old_) {
+      hardware_panic_old_ = hardware_panic_new_;
     }
   }
 
-    if (!synchro_state_old_ && pre_syn_export_) {
-    } else {
-      if (RTT::NewData == port_desired_position_.read(desiredData)) {
-        // std::cout << "  desired: " << desiredData;
-      }
-      if (RTT::NewData == port_motor_position_.read(positionData)) {
-        // std::cout << "  position: " << positionData;
-      }
-      if (RTT::NewData == port_motor_increment_.read(incrementData)) {
-        // std::cout << "  increment: " << incrementData;
-      }
-      if (RTT::NewData == port_motor_current_.read(currentData)) {
-        // std::cout << "  current: " << currentData;
-      }
-      // std::cout << std::endl;
+  if (RTT::NewData == port_desired_position_.read(desiredData)) {
+    // std::cout << "  desired: " << desiredData;
+  }
+  if (RTT::NewData == port_motor_position_.read(positionData)) {
+    // std::cout << "  position: " << positionData;
+  }
+  if (RTT::NewData == port_motor_increment_.read(incrementData)) {
+    // std::cout << "  increment: " << incrementData;
+  }
+  if (RTT::NewData == port_motor_current_.read(currentData)) {
+    // std::cout << "  current: " << currentData;
+  }
+  // std::cout << std::endl;
 
-      write();
-    }
-}
 
-void MotorStateExport::write() {
   struct timeval tp;
   gettimeofday(&tp, NULL);
   int64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
@@ -132,9 +102,9 @@ void MotorStateExport::write() {
   std::ostringstream output;
   output << ms << ";" << desiredData << ";" << positionData << ";"
       << incrementData << ";" << currentData << ";\n";
-  file << output.str();
 
   if (debug_) {
+    std::cout << log;
     std::cout << "  time: " << ms;
     std::cout << "  desired: " << desiredData;
     std::cout << "  position: " << positionData;
@@ -142,9 +112,61 @@ void MotorStateExport::write() {
     std::cout << "  current: " << currentData;
     std::cout << std::endl;
   }
+
+  buffer[log] = output.str();
+  ++log;
+  if (log >= max_log_) log = 0;
+
+  std::cout << "hardware_panic " << hardware_panic_old_  << std::endl;
+
+  if (hardware_panic_old_) {
+    write();
+  }
 }
 
-void MotorStateExport::reset() {
+void Logger::write() {
+  if (!writed) {
+    char cCurrentPath[FILENAME_MAX];
+
+    if (!getcwd(cCurrentPath, sizeof(cCurrentPath))) {
+      return;
+    }
+
+    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0';
+
+    time_t now = time(0);
+    struct tm newtime;
+    char buf[80];
+    localtime_r(&now, &newtime);
+    strftime(buf, sizeof(buf), "_%Y-%m-%d_%X", &newtime);
+
+    std::string filename = std::string(cCurrentPath);
+    int ros = filename.find(".ros");
+    filename = filename.erase(ros) + filename_ + std::string(buf);
+
+    file.open((filename + ".csv").c_str());
+
+    file << reg_number_ << "_time;";
+    file << reg_number_ << "_desired;";
+    file << reg_number_ << "_position;";
+    file << reg_number_ << "_increment;";
+    file << reg_number_ << "_current;";
+
+    file << std::endl;
+
+    for (int i = log; i < max_log_; ++i) {
+      file << buffer[i];
+    }
+    for (int i = 0; i < log; ++i) {
+      file << buffer[i];
+    }
+    file.close();
+
+    writed = true;
+  }
 }
 
-ORO_CREATE_COMPONENT(MotorStateExport)
+void Logger::reset() {
+}
+
+ORO_CREATE_COMPONENT(Logger)

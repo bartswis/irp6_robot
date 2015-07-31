@@ -46,7 +46,6 @@ class SarkofagRegulator : public RTT::TaskContext {
   ~SarkofagRegulator();
 
   int doServo(double, int);
-  int doServo_cas(double, double, int);
   int doServo_friction_test(double, int);
   void reset();
 
@@ -55,7 +54,6 @@ class SarkofagRegulator : public RTT::TaskContext {
   void updateHook();
 
   RTT::InputPort<double> desired_position_;
-  RTT::InputPort<double> measured_position_;
   RTT::InputPort<double> deltaInc_in;
   RTT::InputPort<bool> synchro_state_in_;
 
@@ -64,8 +62,6 @@ class SarkofagRegulator : public RTT::TaskContext {
 
   double desired_position_increment_;
   double desired_position_old_, desired_position_new_;
-  double measured_position_old_, measured_position_new_;
-  double measured_increment_old_, measured_increment_new_;
   double deltaIncData;
 
   bool synchro_state_old_, synchro_state_new_;
@@ -74,37 +70,26 @@ class SarkofagRegulator : public RTT::TaskContext {
   int64_t new_position_iteration_number_;
 
   // Properties
-  int reg_number_;
   bool debug_;
   double A_;
   double BB0_;
   double BB1_;
-  double KP_POS_;
-  double TI_POS_;
-  double TD_POS_;
-  double KP_INC_;
-  double TI_INC_;
-  double TD_INC_;
   bool current_mode_;
   double max_output_current_;
   double current_reg_kp_;
   double eint_dif_;
   double max_desired_increment_;
   double enc_res_;
+  bool ft_;
 
-  std::string regulator_type_;
-
-  enum reg_type {
-    irp6,
-    cascade,
-    friction_test
-  } type;
-
-  double position_increment_old;  // przedosatnio odczytany przyrost polozenie (delta y[k-2]
+  // przedosatnio odczytany przyrost polozenie (delta y[k-2]
+  double position_increment_old;
   // -- mierzone w impulsach)
-  double position_increment_new;  // ostatnio odczytany przyrost polozenie (delta y[k-1]
+  // ostatnio odczytany przyrost polozenie (delta y[k-1]
+  double position_increment_new;
   // -- mierzone w impulsach)
-  double step_old_pulse;  // poprzednia wartosc zadana dla jednego kroku regulacji
+  // poprzednia wartosc zadana dla jednego kroku regulacji
+  double step_old_pulse;
   // (przyrost wartosci zadanej polozenia -- delta r[k-2]
   // -- mierzone w radianach)
   double step_new;  // nastepna wartosc zadana dla jednego kroku regulacji
@@ -114,31 +99,17 @@ class SarkofagRegulator : public RTT::TaskContext {
   // (przyrost wartosci zadanej polozenia -- delta r[k-1]
   // -- mierzone w radianach)
 
-  double set_value_new;  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k])
-  double set_value_old;  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k-1])
-  double set_value_very_old;  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k-2])
+  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k])
+  double set_value_new;
+  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k-1])
+  double set_value_old;
+  // wielkosc kroku do realizacji przez HI (wypelnienie PWM -- u[k-2])
+  double set_value_very_old;
   double delta_eint;  // przyrost calki uchybu
   double delta_eint_old;  // przyrost calki uchybu w poprzednim kroku
-
-  double position_err_new;  // e_pos[k]
-  double position_err_old;  // e_pos[k-1]
-  double position_err_very_old;  // e_pos[k-2]
-
-  double increment_err_new;  // e_inc[k]
-  double increment_err_old;  // e_inc[k-1]
-  double increment_err_very_old;  // e_inc[k-2]
-
-  double position_set_value_new;  // u_pos[k]
-  double position_set_value_old;  // u_pos[k-1]
-  double increment_set_value_new;  // u_inc[k]
-  double increment_set_value_old;  // u_inc[k-1]
 
   double output_value;
 
   double a_, b0_, b1_;
-  double kp_pos, Ti_pos, Td_pos;
-  double kp_inc, Ti_inc, Td_inc;
-  double r0_pos, r1_pos, r2_pos;
-  double r0_inc, r1_inc, r2_inc;
 };
 #endif  // SARKOFAGREGULATOR_H_

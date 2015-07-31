@@ -1,9 +1,10 @@
 
-addPeer("SarkofagScheme", "SarkofagRegulator");
-addPeer("SarkofagScheme", "SarkofagPortDoubleSplit_hw_cp")
-addPeer("SarkofagScheme", "SarkofagPortDoubleAggregate_hw_p")
-addPeer("SarkofagScheme", "SarkofagPortDoubleSum")
-addPeer("SarkofagScheme", "SarkofagM2J");
-addPeer("SarkofagScheme", "SarkofagJ2M");
-addPeer("SarkofagScheme", "SarkofagSplineTrajectoryGeneratorJoint");
-addPeer("SarkofagScheme", "SarkofagSplineTrajectoryGeneratorMotor");
+addPeer("Sarkofagscheme", "SarkofagRegulator");
+addPeer("Sarkofagscheme", "SarkofagPortDoubleSplit_hw_cp")
+addPeer("Sarkofagscheme", "SarkofagPortDoubleAggregate_hw_p")
+addPeer("Sarkofagscheme", "SarkofagLimitDetector")
+addPeer("Sarkofagscheme", "SarkofagPortDoubleSum")
+addPeer("Sarkofagscheme", "SarkofagM2J");
+addPeer("Sarkofagscheme", "SarkofagJ2M");
+addPeer("Sarkofagscheme", "SarkofagSplineTrajectoryGeneratorJoint");
+addPeer("Sarkofagscheme", "SarkofagSplineTrajectoryGeneratorMotor");

@@ -1,5 +1,6 @@
 SarkofagRegulator.start()
 SarkofagPortDoubleSplit_hw_cp.start()
+SarkofagLimitDetector.start()
 SarkofagPortDoubleAggregate_hw_p.start()
 SarkofagPortDoubleSum.start()
 SarkofagM2J.start()

@@ -27,7 +27,8 @@ loadComponent("SarkofagSplineTrajectoryActionMotor", "InternalSpaceSplineTraject
 setActivity("SarkofagSplineTrajectoryActionMotor",0.01 ,2 ,ORO_SCHED_RT)
 SarkofagSplineTrajectoryActionMotor.loadService("rosparam");
 SarkofagSplineTrajectoryActionMotor.rosparam.getAll();
-
+SarkofagSplineTrajectoryActionMotor.rosparam.getParam("~/SarkofagMotorParameters/upper_limits", "upper_limits")
+SarkofagSplineTrajectoryActionMotor.rosparam.getParam("~/SarkofagMotorParameters/lower_limits", "lower_limits")
 SarkofagSplineTrajectoryActionMotor.loadService("actionlib")
 SarkofagSplineTrajectoryActionMotor.actionlib.connect("/sarkofag/spline_trajectory_action_motor")
 

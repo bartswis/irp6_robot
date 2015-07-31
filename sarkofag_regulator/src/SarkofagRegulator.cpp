@@ -37,7 +37,6 @@ const int MAX_PWM = 190;
 SarkofagRegulator::SarkofagRegulator(const std::string& name)
     : TaskContext(name),
       desired_position_("DesiredPosition"),
-      measured_position_("MeasuredPosition"),
       deltaInc_in("deltaInc_in"),
       computedPwm_out("computedPwm_out"),
       synchro_state_in_("SynchroStateIn"),
@@ -46,27 +45,11 @@ SarkofagRegulator::SarkofagRegulator(const std::string& name)
       a_(0.0),
       b0_(0.0),
       b1_(0.0),
-      kp_pos(0.0),
-      Ti_pos(0.0),
-      Td_pos(0.0),
-      kp_inc(0.0),
-      Ti_inc(0.0),
-      Td_inc(0.0),
       delta_eint_old(0.0),
       delta_eint(0.0),
       deltaIncData(0.0),
       output_value(0.0),
       desired_position_increment_(0.0),
-      position_err_new(0.0),
-      position_err_old(0.0),
-      position_err_very_old(0.0),
-      position_set_value_new(0.0),
-      position_set_value_old(0.0),
-      increment_err_new(0.0),
-      increment_err_old(0.0),
-      increment_err_very_old(0.0),
-      increment_set_value_new(0.0),
-      increment_set_value_old(0.0),
       position_increment_new(0.0),
       position_increment_old(0.0),
       set_value_new(0.0),
@@ -82,10 +65,9 @@ SarkofagRegulator::SarkofagRegulator(const std::string& name)
       desired_position_new_(0.0),
       synchro_state_old_(false),
       synchro_state_new_(false),
-      type(irp6) {
+      ft_(false) {
   this->addEventPort(desired_position_).doc(
       "Receiving a value of position step.");
-  this->addEventPort(measured_position_).doc("Receiving a value of position.");
   this->addPort(deltaInc_in).doc("Receiving a value of measured increment.");
   this->addPort(computedPwm_out).doc(
       "Sending value of calculated pwm or current.");
@@ -95,20 +77,13 @@ SarkofagRegulator::SarkofagRegulator(const std::string& name)
   this->addProperty("A", A_).doc("");
   this->addProperty("BB0", BB0_).doc("");
   this->addProperty("BB1", BB1_).doc("");
-  this->addProperty("KP_POS", KP_POS_).doc("");
-  this->addProperty("TI_POS", TI_POS_).doc("");
-  this->addProperty("TD_POS", TD_POS_).doc("");
-  this->addProperty("KP_INC", KP_INC_).doc("");
-  this->addProperty("TI_INC", TI_INC_).doc("");
-  this->addProperty("TD_INC", TD_INC_).doc("");
   this->addProperty("max_output_current", max_output_current_).doc("");
   this->addProperty("current_reg_kp", current_reg_kp_).doc("");
-  this->addProperty("reg_number", reg_number_).doc("");
   this->addProperty("debug", debug_).doc("");
   this->addProperty("eint_dif", eint_dif_).doc("");
   this->addProperty("max_desired_increment", max_desired_increment_).doc("");
   this->addProperty("enc_res", enc_res_).doc("");
-  this->addProperty("regulator_type", regulator_type_).doc("");
+  this->addProperty("friction_test", ft_).doc("");
 }
 
 SarkofagRegulator::~SarkofagRegulator() {
@@ -121,28 +96,7 @@ bool SarkofagRegulator::configureHook() {
   b0_ = BB0_;
   b1_ = BB1_;
 
-  kp_pos = KP_POS_;
-  Ti_pos = TI_POS_;
-  Td_pos = TD_POS_;
-  kp_inc = KP_INC_;
-  Ti_inc = TI_INC_;
-  Td_inc = TD_INC_;
-
-  r0_pos = kp_pos * (1 + 1 / (2 * Ti_pos) + Td_pos);
-  r1_pos = kp_pos * (1 / (2 * Ti_pos) - 2 * Td_pos - 1);
-  r2_pos = kp_pos * Td_pos;
-
-  r0_inc = kp_inc * (1 + 1 / (2 * Ti_inc) + Td_inc);
-  r1_inc = kp_inc * (1 / (2 * Ti_inc) - 2 * Td_inc - 1);
-  r2_inc = kp_inc * Td_inc;
-
   desired_position_old_ = desired_position_new_ = 0.0;
-
-  type = irp6;
-  if (regulator_type_ == "friction_test")
-    type = friction_test;
-  if (regulator_type_ == "cascade")
-    type = cascade;
 
   return true;
 }
@@ -159,9 +113,6 @@ void SarkofagRegulator::updateHook() {
       if (new_position_iteration_number_ <= 1) {
         desired_position_old_ = desired_position_new_;
       }
-    }
-
-    if (RTT::NewData == measured_position_.read(measured_position_new_)) {
     }
 
     if (RTT::NewData == synchro_state_in_.read(synchro_state_new_)) {
@@ -184,25 +135,10 @@ void SarkofagRegulator::updateHook() {
     }*/
 
     desired_position_old_ = desired_position_new_;
-    measured_position_old_ = measured_position_new_;
 
     int output;
-    if (synchro_state_old_) {
-      switch (type) {
-        case irp6:
-          output = doServo(desired_position_increment_, deltaIncData);
-          break;
-        case cascade:
-          output = doServo_cas(desired_position_new_, measured_position_new_,
-                               deltaIncData);
-          break;
-        case friction_test:
-          output = doServo_friction_test(0.0, deltaIncData);
-          break;
-        default:
-          output = doServo(desired_position_increment_, deltaIncData);
-          break;
-      }
+    if (synchro_state_old_ && ft_) {
+        output = doServo_friction_test(0.0, deltaIncData);
     } else {
       output = doServo(desired_position_increment_, deltaIncData);
     }
@@ -287,57 +223,6 @@ int SarkofagRegulator::doServo(double step_new, int pos_inc) {
   return (static_cast<int>(output_value));
 }
 
-int SarkofagRegulator::doServo_cas(double position_desired, double position,
-                                   int increment) {
-  // algorytm regulacji
-
-  position_err_new = position_desired - position;
-
-  position_set_value_new = position_set_value_old + position_err_new * r0_pos
-      + position_err_old * r1_pos + position_err_very_old * r2_pos;
-
-  double increment_desired = position_set_value_new;
-
-  increment_err_new = increment_desired - increment;
-
-  increment_set_value_new = increment_set_value_old + increment_err_new * r0_inc
-      + increment_err_old * r1_inc + increment_err_very_old * r2_inc;
-
-  // ograniczenie na sterowanie
-  if (increment_set_value_new > MAX_PWM)
-    increment_set_value_new = MAX_PWM;
-  if (increment_set_value_new < -MAX_PWM)
-    increment_set_value_new = -MAX_PWM;
-
-  if (current_mode_) {
-    output_value = increment_set_value_new * current_reg_kp_;
-    if (output_value > max_output_current_) {
-      output_value = max_output_current_;
-    } else if (output_value < -max_output_current_) {
-      output_value = -max_output_current_;
-    }
-  } else {
-    output_value = increment_set_value_new;
-  }
-
-  if (debug_) {
-    std::cout << position_desired << ";" << position << ";" << position_err_new
-              << ";" << position_set_value_new << ";" << increment_err_new
-              << ";" << increment_set_value_new << ";" << output_value
-              << std::endl;
-  }
-
-  position_err_very_old = position_err_old;
-  position_err_old = position_err_new;
-  position_set_value_old = position_set_value_new;
-
-  increment_err_very_old = increment_err_old;
-  increment_err_old = increment_err_new;
-  increment_set_value_old = increment_set_value_new;
-
-  return (static_cast<int>(output_value));
-}
-
 int SarkofagRegulator::doServo_friction_test(double, int pos_inc) {
   if (pos_inc > 0) {
     output_value = 3747.035989910421 * exp(0.0007760029070562380 * pos_inc)
@@ -375,16 +260,6 @@ void SarkofagRegulator::reset() {
   set_value_very_old = 0.0;
   delta_eint = 0.0;
   delta_eint_old = 0.0;
-  position_err_new = 0.0;
-  position_err_old = 0.0;
-  position_err_very_old = 0.0;
-  position_set_value_new = 0.0;
-  position_set_value_old = 0.0;
-  increment_err_new = 0.0;
-  increment_err_old = 0.0;
-  increment_err_very_old = 0.0;
-  increment_set_value_new = 0.0;
-  increment_set_value_old = 0.0;
 }
 
 ORO_CREATE_COMPONENT(SarkofagRegulator)

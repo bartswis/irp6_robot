@@ -1,4 +1,22 @@
 
+
+loadComponent("SarkofagLimitDetector","LimitDetector")
+SarkofagLimitDetector.loadService("rosparam")
+SarkofagLimitDetector.rosparam.getAll()
+SarkofagLimitDetector.rosparam.getParam("~/SarkofagMotorParameters/upper_limits", "upper_limits")
+SarkofagLimitDetector.rosparam.getParam("~/SarkofagMotorParameters/lower_limits", "lower_limits")
+SarkofagLimitDetector.configure()
+
+
+// Motors Regulators
+
+
+loadComponent("SarkofagRegulator","IRp6Regulator")
+SarkofagRegulator.loadService("rosparam")
+SarkofagRegulator.rosparam.getAll()
+SarkofagRegulator.configure()
+
+
 // Sarkofag double port spliter
 
 loadComponent("SarkofagPortDoubleSplit_hw_cp","PortDoubleSplit")
@@ -47,8 +65,11 @@ SarkofagSplineTrajectoryGeneratorJoint.configure()
 loadComponent("SarkofagSplineTrajectoryGeneratorMotor", "InternalSpaceSplineTrajectoryGenerator")
 SarkofagSplineTrajectoryGeneratorMotor.loadService("rosparam");
 SarkofagSplineTrajectoryGeneratorMotor.rosparam.getAll();
+
+connect("SarkofagLimitDetector.OutputPort","SarkofagPortDoubleSplit_hw_cp.InputPort", ConnPolicy())
+
 connect("SarkofagPortDoubleAggregate_hw_p.OutputPort","SarkofagSplineTrajectoryGeneratorMotor.JointPosition", ConnPolicy())
-connect("SarkofagSplineTrajectoryGeneratorMotor.JointPositionCommand","SarkofagPortDoubleSplit_hw_cp.InputPort", ConnPolicy())
+connect("SarkofagSplineTrajectoryGeneratorMotor.JointPositionCommand","SarkofagLimitDetector.InputPort", ConnPolicy())
 SarkofagSplineTrajectoryGeneratorMotor.configure()
 
 
@@ -56,7 +77,6 @@ SarkofagSplineTrajectoryGeneratorMotor.configure()
 connect("SarkofagPortDoubleSum.InputPort_0","SarkofagRegulator.computedPwm_out", ConnPolicy())
 connect("SarkofagHardwareInterface.computedReg_in_sarkofag","SarkofagPortDoubleSum.OutputPort", ConnPolicy())
 connect("SarkofagRegulator.DesiredPosition","SarkofagHardwareInterface.DesiredPosition_out_sarkofag", ConnPolicy())
-connect("SarkofagRegulator.MeasuredPosition","SarkofagHardwareInterface.MotorPosition_sarkofag", ConnPolicy())
 connect("SarkofagRegulator.deltaInc_in","SarkofagHardwareInterface.MotorIncrement_sarkofag", ConnPolicy())
 connect("SarkofagRegulator.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
 connect("SarkofagRegulator.EmergencyStopOut","SarkofagHardwareInterface.EmergencyStopIn", ConnPolicy())
@@ -64,7 +84,7 @@ connect("SarkofagRegulator.EmergencyStopOut","SarkofagHardwareInterface.Emergenc
 
 
 connect("SarkofagPortDoubleAggregate_hw_p.OutputPort","SarkofagM2J.MotorPosition", ConnPolicy())
-connect("SarkofagJ2M.MotorPosition", "SarkofagPortDoubleSplit_hw_cp.InputPort", ConnPolicy())
+connect("SarkofagJ2M.MotorPosition", "SarkofagLimitDetector.InputPort", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagHardwareInterface.MotorPositionCommand_sarkofag", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagRegulator.DesiredPosition", ConnPolicy())
 connect("SarkofagPortDoubleAggregate_hw_p.InputPort_0","SarkofagHardwareInterface.MotorPosition_sarkofag", ConnPolicy())

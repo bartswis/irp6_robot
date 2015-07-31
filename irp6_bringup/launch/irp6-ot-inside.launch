@@ -12,7 +12,7 @@
           ports_adresses: /dev/ttyMI7
           synchro_needed: 1
           max_current: 27000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 15
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -23,7 +23,7 @@
           ports_adresses: /dev/ttyMI0
           synchro_needed: 1
           max_current: 25000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 8
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -34,7 +34,7 @@
           ports_adresses: /dev/ttyMI1
           synchro_needed: 1
           max_current: 18000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 9
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -45,7 +45,7 @@
           ports_adresses: /dev/ttyMI2
           synchro_needed: 1
           max_current: 15000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 10
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -56,7 +56,7 @@
           ports_adresses: /dev/ttyMI3
           synchro_needed: 1
           max_current: 17000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 11
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -67,7 +67,7 @@
           ports_adresses: /dev/ttyMI4
           synchro_needed: 1
           max_current: 10000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 12
           enc_res: 4000.0
           synchro_step_coarse: -0.03
@@ -78,7 +78,7 @@
           ports_adresses: /dev/ttyMI5
           synchro_needed: 1
           max_current: 2000
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 13
           enc_res: 2000.0
           synchro_step_coarse: -0.05
@@ -89,7 +89,7 @@
           ports_adresses: /dev/ttyMI6
           synchro_needed: 1
           max_current: 200
-          max_increment: 1000.0
+          max_increment: 10000.0
           card_indexes: 14
           enc_res: 128.0
           synchro_step_coarse: -0.5

@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOTORSTATEEXPORT_H_
-#define MOTORSTATEEXPORT_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
@@ -40,13 +40,14 @@
 #include <ros/ros.h>
 
 #include <fstream> // NOLINT
+#include <vector>
 #include <string>
 #include <ctime>
 
-class MotorStateExport : public RTT::TaskContext {
+class Logger : public RTT::TaskContext {
  public:
-  explicit MotorStateExport(const std::string& name);
-  ~MotorStateExport();
+  explicit Logger(const std::string& name);
+  ~Logger();
 
   void reset();
 
@@ -60,25 +61,27 @@ class MotorStateExport : public RTT::TaskContext {
   RTT::InputPort<double> port_motor_increment_;
   RTT::InputPort<double> port_motor_current_;
 
-  RTT::InputPort<bool> synchro_state_in_;
+  RTT::InputPort<bool> hardware_panic_in_;
 
   double desiredData;
   double positionData;
   double incrementData;
   double currentData;
 
-  bool synchro_state_old_, synchro_state_new_;
+  bool hardware_panic_old_, hardware_panic_new_;
 
   int64_t update_hook_iteration_number_;
   int64_t new_position_iteration_number_;
 
   // Properties
   int reg_number_;
-  bool pre_syn_export_;
   std::string filename_;
   bool debug_;
+  bool writed;
 
   std::ofstream file;
+  std::vector<std::string> buffer;
+  int log, max_log_;
 };
 
-#endif  // MOTORSTATEEXPORT_H_
+#endif  // LOGGER_H_

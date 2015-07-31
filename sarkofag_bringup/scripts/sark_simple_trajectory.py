@@ -53,12 +53,8 @@ import tf_conversions.posemath as pm
 if __name__ == '__main__':
   rospy.init_node('sark_simple_trajectory')
   
-  if len(sys.argv) > 1 and sys.argv[1]=="csn":
-      rospy.wait_for_service('/sarkofag_manager/switch_controller')
-      conmanSwitch = rospy.ServiceProxy('/sarkofag_manager/switch_controller', SwitchController)
-  else :
-    rospy.wait_for_service('/controller_manager/switch_controller')
-    conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
+  rospy.wait_for_service('/sarkofag_manager/switch_controller')
+  conmanSwitch = rospy.ServiceProxy('/sarkofag_manager/switch_controller', SwitchController)
   
   conmanSwitch(['SarkofagSplineTrajectoryGeneratorJoint'], [], True)
   
