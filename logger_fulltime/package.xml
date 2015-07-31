@@ -1,7 +1,7 @@
 <package>
-  <name>motor_state_export</name>
-  <version>0.0.3</version>
-  <description>Motor state export.</description>
+  <name>logger_fulltime</name>
+  <version>0.0.1</version>
+  <description>fulltime motor state log</description>
   <maintainer email="bartswis@gmail.com">Bartosz Świstak</maintainer>
 
   <license>BSD</license>

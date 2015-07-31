@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(motor_state_export)
+project(logger_panic)
 
 find_package(catkin REQUIRED COMPONENTS rtt_ros cmake_modules)
 
@@ -12,7 +12,7 @@ catkin_package(
   CATKIN_DEPENDS rtt_ros 
 )
 
-orocos_component(${PROJECT_NAME} src/MotorStateExport.cpp)
+orocos_component(${PROJECT_NAME} src/PanicLogger.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 orocos_generate_package()

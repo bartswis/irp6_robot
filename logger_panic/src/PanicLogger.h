@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef PANICLOGGER_H_
+#define PANICLOGGER_H_
 
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
@@ -44,10 +44,10 @@
 #include <string>
 #include <ctime>
 
-class Logger : public RTT::TaskContext {
+class PanicLogger : public RTT::TaskContext {
  public:
-  explicit Logger(const std::string& name);
-  ~Logger();
+  explicit PanicLogger(const std::string& name);
+  ~PanicLogger();
 
   void reset();
 
@@ -68,7 +68,7 @@ class Logger : public RTT::TaskContext {
   double incrementData;
   double currentData;
 
-  bool hardware_panic_old_, hardware_panic_new_;
+  bool hardware_panic;
 
   int64_t update_hook_iteration_number_;
   int64_t new_position_iteration_number_;
@@ -84,4 +84,4 @@ class Logger : public RTT::TaskContext {
   int log, max_log_;
 };
 
-#endif  // LOGGER_H_
+#endif  // PANICLOGGER_H_

@@ -43,10 +43,10 @@
 #include <string>
 #include <ctime>
 
-class MotorStateExport : public RTT::TaskContext {
+class FullTimeLogger : public RTT::TaskContext {
  public:
-  explicit MotorStateExport(const std::string& name);
-  ~MotorStateExport();
+  explicit FullTimeLogger(const std::string& name);
+  ~FullTimeLogger();
 
   void reset();
 
