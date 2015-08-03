@@ -135,7 +135,7 @@ void PanicLogger::write() {
     localtime_r(&now, &newtime);
     strftime(buf, sizeof(buf), "_%Y-%m-%d_%X", &newtime);
 
-    std::string filename = std::string(cCurrentPath);
+    std::string filename = "plog_" + std::string(cCurrentPath);
     int ros = filename.find(".ros");
     filename = filename.erase(ros) + filename_ + std::string(buf);
 
