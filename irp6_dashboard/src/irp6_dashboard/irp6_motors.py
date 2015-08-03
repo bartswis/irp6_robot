@@ -36,6 +36,7 @@ import actionlib
 import rospy
 from rqt_robot_dashboard.widgets import MenuDashWidget
 import std_srvs.srv
+import datetime, threading, time
 
 from std_msgs.msg import *
 from irpos import *
@@ -43,6 +44,7 @@ from irpos import *
 
 class Irp6MotorStatus():
     def __init__(self, context):
+        self.is_busy = False
         self.is_responding = False
         self.is_synchronised = False
         self.motion_in_progress = False
@@ -51,7 +53,8 @@ class Irp6MotorStatus():
 
 
     def is_eq(self,s1):
-        if ((self.is_responding == s1.is_responding)
+        if ((self.is_busy == s1.is_busy)
+        and(self.is_responding == s1.is_responding)
         and (self.is_synchronised == s1.is_synchronised)
         and (self.motion_in_progress == s1.motion_in_progress)
         and (self.synchro_in_progress == s1.synchro_in_progress)
@@ -62,6 +65,7 @@ class Irp6MotorStatus():
 
 
     def assign(self,s1):
+        self.is_busy = s1.is_busy
         self.is_responding = s1.is_responding
         self.is_synchronised = s1.is_synchronised
         self.motion_in_progress = s1.motion_in_progress
@@ -97,9 +101,27 @@ class Irp6Motors(MenuDashWidget):
         
         self.status = Irp6MotorStatus(self)
         self.previous_status = Irp6MotorStatus(self)
-
         
-      
+        self.diagnostic_messages_number = 0
+
+
+    def monitor_robot_activity(self):
+        next_call = time.time()
+        previous_diagnostic_messages_number = 0
+        while True:
+            if (self.diagnostic_messages_number == previous_diagnostic_messages_number):
+                self.status.is_responding = False
+            else:
+                self.status.is_responding = True
+                if (self.previous_status.is_responding == False):
+                    self.status.motion_in_progress = False
+                    self.status.synchro_in_progress = False
+                previous_diagnostic_messages_number = self.diagnostic_messages_number
+            if (not self.status.is_eq(self.previous_status)):
+                self.change_motors_widget_state()
+            next_call = next_call+0.5; # wariant dla /diagnostics z poszczegolnych robotow
+            # next_call = next_call+1.5; # wariant dla /diagnostics_agg 
+            time.sleep(next_call - time.time())
 
 
     def set_ok(self):
@@ -133,11 +155,15 @@ class Irp6Motors(MenuDashWidget):
         self.move_to_synchro_pos_action.setDisabled(True)
         self.move_to_front_pos_action.setDisabled(True)
         self.synchronise_action.setDisabled(True)
-        
-        
+
+
     def change_motors_widget_state(self):
         # print self.name + ": change_motors_widget_state"
-        if self.status.is_emergency_stop_activated == True:
+        if self.status.is_responding == False:
+            self.set_stale()
+            self.disable_all_actions()
+            self.setToolTip(self.tr(self.name + ": Not responding"))
+        elif self.status.is_emergency_stop_activated == True:
             self.set_error()
             self.disable_all_actions()
             self.setToolTip(self.tr(self.name + ": Hardware Panic, Check emergency stop, Restart hardware and deployer"))
@@ -147,14 +173,17 @@ class Irp6Motors(MenuDashWidget):
                 self.enable_pre_synchro_actions()
                 self.setToolTip(self.tr(self.name + ": Robot not synchronised, Execute synchronisation and wait for operation finish"))
             else:
-                self.set_stale()
+                self.set_warn()
                 self.disable_all_actions()
                 self.setToolTip(self.tr(self.name + ": Synchronisation in progress"))
         else:
-            if self.status.motion_in_progress == True:
-                self.set_stale()
+            if self.status.is_busy == True:
+                self.set_warn()
                 self.disable_all_actions()
-                self.setToolTip(self.tr(self.name + ": Robot in motion"))
+                if self.status.motion_in_progress == True:
+                    self.setToolTip(self.tr(self.name + ": Robot in motion (internal call)"))
+                else:
+                    self.setToolTip(self.tr(self.name + ": Robot in motion (external call)"))
             else:
                 self.set_ok()
                 self.enable_post_synchro_actions()
@@ -164,7 +193,7 @@ class Irp6Motors(MenuDashWidget):
 
 
     def interpret_diagnostic_message(self,status):
-        # Ponizsze rozwiazanie nei bedzie dzialalo po wylaczeniu robota - do poprawy
+        self.diagnostic_messages_number += 1
         self.status.is_responding = True 
         for kv in status.values:
             if kv.key == 'Synchro':
@@ -177,6 +206,11 @@ class Irp6Motors(MenuDashWidget):
                     self.status.is_emergency_stop_activated = True
                 else:
                     self.status.is_emergency_stop_activated = False
+            elif kv.key == 'HardwareBusy':
+                if kv.value == 'TRUE':
+                    self.status.is_busy = True
+                else:
+                    self.status.is_busy = False
                     
             if (not self.status.is_eq(self.previous_status)):
                 self.change_motors_widget_state()
