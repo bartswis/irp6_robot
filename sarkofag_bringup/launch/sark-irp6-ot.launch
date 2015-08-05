@@ -58,6 +58,13 @@
         max_output_current: 20000.0
         max_desired_increment: 200.0
         enc_res: 4000.0
+      SarkofagLogger:
+        reg_number: 1
+        max_log: 100
+        full_log: true
+        debug: false
+        pre_syn_export: false
+        filename: irp6-ot
       SarkofagPortDoubleSplit_hw_cp:
         number_of_ports: 1
       SarkofagPortDoubleAggregate_hw_p:

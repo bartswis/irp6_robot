@@ -1,7 +1,7 @@
 <package>
-  <name>logger_fulltime</name>
+  <name>logger</name>
   <version>0.0.1</version>
-  <description>fulltime motor state log</description>
+  <description>motor state log</description>
   <maintainer email="bartswis@gmail.com">Bartosz Świstak</maintainer>
 
   <license>BSD</license>

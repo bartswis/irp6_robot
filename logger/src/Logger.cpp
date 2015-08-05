@@ -28,43 +28,81 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Logger.h"
+
 #include <string>
-#include "PanicLogger.h"
 #include "../../hardware_interface/src/string_colors.h"
 
 const int MAX_PWM = 190;
 
-PanicLogger::PanicLogger(const std::string& name)
+Logger::Logger(const std::string& name)
 : TaskContext(name),
   port_desired_position_("DesiredPositionIn"),
   port_motor_position_("MotorPositionIn"),
   port_motor_increment_("MotorIncrementIn"),
   port_motor_current_("MotorCurrentIn"),
   hardware_panic_in_("HardwarePanicIn"),
+  synchro_state_in_("SynchroStateIn"),
   desiredData(0.0),
   positionData(0.0),
   incrementData(0.0),
   currentData(0.0),
   log(0),
-  writed(false) {
+  writed(false)  {
   this->addEventPort(port_desired_position_).doc("");
   this->addPort(port_motor_position_).doc("");
   this->addPort(port_motor_increment_).doc("");
   this->addPort(port_motor_current_).doc("");
 
   this->addPort(hardware_panic_in_).doc("Hardware Panic from HardwareInterface");
+  this->addPort(synchro_state_in_).doc("Synchro State from HardwareInterface");
 
   this->addProperty("reg_number", reg_number_).doc("");
   this->addProperty("debug", debug_).doc("");
+  this->addProperty("pre_syn_export", pre_syn_export_).doc("");
   this->addProperty("filename", filename_).doc("");
   this->addProperty("max_log", max_log_).doc("");
+  this->addProperty("full_log", full_log_).doc("");
 }
 
-PanicLogger::~PanicLogger() {
+Logger::~Logger() {
+  if (full_log_) {
+    file.close();
+  }
 }
 
-bool PanicLogger::configureHook() {
+bool Logger::configureHook() {
   reset();
+
+  if (full_log_) {
+    char cCurrentPath[FILENAME_MAX];
+
+    if (!getcwd(cCurrentPath, sizeof(cCurrentPath))) {
+      return errno;
+    }
+
+    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0';
+
+    time_t now = time(0);
+    struct tm newtime;
+    char buf[80];
+    localtime_r(&now, &newtime);
+    strftime(buf, sizeof(buf), "_%Y-%m-%d_%X", &newtime);
+
+    std::string filename = std::string(cCurrentPath);
+    int ros = filename.find(".ros");
+    filename = filename.erase(ros) + "log_" + filename_ + std::string(buf);
+
+    file.open((filename + ".csv").c_str());
+
+    file << reg_number_ << "_time;";
+    file << reg_number_ << "_desired;";
+    file << reg_number_ << "_position;";
+    file << reg_number_ << "_increment;";
+    file << reg_number_ << "_current;";
+
+    file << std::endl;
+  }
 
   buffer.resize(max_log_);
   hardware_panic = false;
@@ -72,7 +110,13 @@ bool PanicLogger::configureHook() {
   return true;
 }
 
-void PanicLogger::updateHook() {
+void Logger::updateHook() {
+  if (RTT::NewData == synchro_state_in_.read(synchro_state_new_)) {
+    if (synchro_state_new_ != synchro_state_old_) {
+      synchro_state_old_ = synchro_state_new_;
+    }
+  }
+
   if (RTT::NewData == hardware_panic_in_.read(hardware_panic)) {
     // std::cout << "hardware_panic " << hardware_panic  << std::endl;
   }
@@ -115,12 +159,28 @@ void PanicLogger::updateHook() {
   if (log >= max_log_) log = 0;
 
   if (hardware_panic) {
-    write();
+    panic_write();
+  }
+
+  if (synchro_state_old_ || !pre_syn_export_) {
+    if (full_log_) write();
   }
 }
 
-void PanicLogger::write() {
+void Logger::write() {
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+  int64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+
+  std::ostringstream output;
+  output << ms << ";" << desiredData << ";" << positionData << ";"
+      << incrementData << ";" << currentData << ";\n";
+  file << output.str();
+}
+
+void Logger::panic_write() {
   if (!writed) {
+    std::ofstream panic_file;
     char cCurrentPath[FILENAME_MAX];
 
     if (!getcwd(cCurrentPath, sizeof(cCurrentPath))) {
@@ -135,33 +195,33 @@ void PanicLogger::write() {
     localtime_r(&now, &newtime);
     strftime(buf, sizeof(buf), "_%Y-%m-%d_%X", &newtime);
 
-    std::string filename = "plog_" + std::string(cCurrentPath);
+    std::string filename = std::string(cCurrentPath);
     int ros = filename.find(".ros");
-    filename = filename.erase(ros) + filename_ + std::string(buf);
+    filename = filename.erase(ros) + "panic_log_" + filename_ + std::string(buf);
 
-    file.open((filename + ".csv").c_str());
+    panic_file.open((filename + ".csv").c_str());
 
-    file << reg_number_ << "_time;";
-    file << reg_number_ << "_desired;";
-    file << reg_number_ << "_position;";
-    file << reg_number_ << "_increment;";
-    file << reg_number_ << "_current;";
+    panic_file << reg_number_ << "_time;";
+    panic_file << reg_number_ << "_desired;";
+    panic_file << reg_number_ << "_position;";
+    panic_file << reg_number_ << "_increment;";
+    panic_file << reg_number_ << "_current;";
 
-    file << std::endl;
+    panic_file << std::endl;
 
     for (int i = log; i < max_log_; ++i) {
-      file << buffer[i];
+      panic_file << buffer[i];
     }
     for (int i = 0; i < log; ++i) {
-      file << buffer[i];
+      panic_file << buffer[i];
     }
-    file.close();
+    panic_file.close();
 
     writed = true;
   }
 }
 
-void PanicLogger::reset() {
+void Logger::reset() {
 }
 
-ORO_CREATE_COMPONENT(PanicLogger)
+ORO_CREATE_COMPONENT(Logger)

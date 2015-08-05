@@ -21,6 +21,7 @@ ros.import("limit_detector");
 ros.import("port_operations")
 ros.import("hardware_interface")
 ros.import("irp6_regulator")
+ros.import("logger")
 ros.import("oro_joint_state_publisher")
 ros.import("internal_space_spline_trajectory_action")
 ros.import("internal_space_spline_trajectory_generator")
@@ -65,6 +66,12 @@ loadComponent("SarkofagRegulator","IRp6Regulator")
 SarkofagRegulator.loadService("rosparam")
 SarkofagRegulator.rosparam.getAll()
 SarkofagRegulator.configure()
+
+loadComponent("SarkofagLogger","Logger")
+setActivity("SarkofagLogger", 0.002, 4, ORO_SCHED_RT);
+SarkofagLogger.loadService("rosparam")
+SarkofagLogger.rosparam.getAll()
+SarkofagLogger.configure()
 
 
 // Sarkofag double port spliter
@@ -131,12 +138,20 @@ connect("SarkofagRegulator.deltaInc_in","SarkofagHardwareInterface.MotorIncremen
 connect("SarkofagRegulator.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
 connect("SarkofagRegulator.EmergencyStopOut","SarkofagHardwareInterface.EmergencyStopIn", ConnPolicy())
 
+connect("SarkofagLogger.DesiredPositionIn","SarkofagHardwareInterface.DesiredPosition_out_irp6otm_1", ConnPolicy())
+connect("SarkofagLogger.MotorPositionIn","SarkofagHardwareInterface.MotorPosition_irp6otm_1", ConnPolicy())
+connect("SarkofagLogger.MotorIncrementIn","SarkofagHardwareInterface.MotorIncrement_irp6otm_1", ConnPolicy())
+connect("SarkofagLogger.MotorCurrentIn","SarkofagHardwareInterface.MotorCurrent_irp6otm_1", ConnPolicy())
+connect("SarkofagLogger.HardwarePanicIn","SarkofagHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("SarkofagLogger.EmergencyStopOut","SarkofagHardwareInterface.EmergencyStopIn", ConnPolicy())
+
 
 
 connect("SarkofagPortDoubleAggregate_hw_p.OutputPort","SarkofagM2J.MotorPosition", ConnPolicy())
 connect("SarkofagJ2M.MotorPosition", "SarkofagLimitDetector.InputPort", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagHardwareInterface.MotorPositionCommand_irp6otm_1", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagRegulator.DesiredPosition", ConnPolicy())
+connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagLogger.DesiredPositionIn", ConnPolicy())
 connect("SarkofagPortDoubleAggregate_hw_p.InputPort_0","SarkofagHardwareInterface.MotorPosition_irp6otm_1", ConnPolicy())
 
 addPeer("Sarkofagscheme", "SarkofagHardwareInterface")
@@ -219,6 +234,7 @@ SarkofagJntPub.configure()
 
 Sarkofagscheme.start()
 
+SarkofagLogger.start()
 SarkofagRegulator.start()
 SarkofagPortDoubleSplit_hw_cp.start()
 SarkofagLimitDetector.start()

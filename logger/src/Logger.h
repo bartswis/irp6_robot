@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOTORSTATEEXPORT_H_
-#define MOTORSTATEEXPORT_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
@@ -40,13 +40,14 @@
 #include <ros/ros.h>
 
 #include <fstream> // NOLINT
+#include <vector>
 #include <string>
 #include <ctime>
 
-class FullTimeLogger : public RTT::TaskContext {
+class Logger : public RTT::TaskContext {
  public:
-  explicit FullTimeLogger(const std::string& name);
-  ~FullTimeLogger();
+  explicit Logger(const std::string& name);
+  ~Logger();
 
   void reset();
 
@@ -54,12 +55,14 @@ class FullTimeLogger : public RTT::TaskContext {
   bool configureHook();
   void updateHook();
   void write();
+  void panic_write();
 
   RTT::InputPort<double> port_desired_position_;
   RTT::InputPort<double> port_motor_position_;
   RTT::InputPort<double> port_motor_increment_;
   RTT::InputPort<double> port_motor_current_;
 
+  RTT::InputPort<bool> hardware_panic_in_;
   RTT::InputPort<bool> synchro_state_in_;
 
   double desiredData;
@@ -68,17 +71,23 @@ class FullTimeLogger : public RTT::TaskContext {
   double currentData;
 
   bool synchro_state_old_, synchro_state_new_;
+  bool hardware_panic;
 
   int64_t update_hook_iteration_number_;
   int64_t new_position_iteration_number_;
 
   // Properties
   int reg_number_;
-  bool pre_syn_export_;
   std::string filename_;
+  bool pre_syn_export_;
   bool debug_;
+  bool full_log_;
+  int max_log_;
 
   std::ofstream file;
+  std::vector<std::string> buffer;
+  int log;
+  bool writed;
 };
 
-#endif  // MOTORSTATEEXPORT_H_
+#endif  // LOGGER_H_

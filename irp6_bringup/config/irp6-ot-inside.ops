@@ -13,6 +13,12 @@ Irp6otScheme.rosparam.getAll()
 Irp6otScheme.loadService("conman_ros")
 Irp6otScheme.configure()
 
+loadComponent("Irp6otLogScheme", "conman::Scheme");
+setActivity("Irp6otLogScheme", 0.002, 4, ORO_SCHED_RT);
+Irp6otLogScheme.loadService("rosparam")
+Irp6otLogScheme.rosparam.getAll()
+Irp6otLogScheme.loadService("conman_ros")
+Irp6otLogScheme.configure()
 
 //------------------------------------------------------------------------------
 //-- Irp6otHardwareInterface
@@ -153,6 +159,47 @@ loadComponent("Irp6ottfgRegulator","IRp6Regulator")
 Irp6ottfgRegulator.loadService("rosparam")
 Irp6ottfgRegulator.rosparam.getAll()
 Irp6ottfgRegulator.configure()
+
+
+loadComponent("IRp6otmLogger_0","Logger")
+IRp6otmLogger_0.loadService("rosparam")
+IRp6otmLogger_0.rosparam.getAll()
+IRp6otmLogger_0.configure()
+
+loadComponent("IRp6otmLogger_1","Logger")
+IRp6otmLogger_1.loadService("rosparam")
+IRp6otmLogger_1.rosparam.getAll()
+IRp6otmLogger_1.configure()
+
+loadComponent("IRp6otmLogger_2","Logger")
+IRp6otmLogger_2.loadService("rosparam")
+IRp6otmLogger_2.rosparam.getAll()
+IRp6otmLogger_2.configure()
+
+loadComponent("IRp6otmLogger_3","Logger")
+IRp6otmLogger_3.loadService("rosparam")
+IRp6otmLogger_3.rosparam.getAll()
+IRp6otmLogger_3.configure()
+
+loadComponent("IRp6otmLogger_4","Logger")
+IRp6otmLogger_4.loadService("rosparam")
+IRp6otmLogger_4.rosparam.getAll()
+IRp6otmLogger_4.configure()
+
+loadComponent("IRp6otmLogger_5","Logger")
+IRp6otmLogger_5.loadService("rosparam")
+IRp6otmLogger_5.rosparam.getAll()
+IRp6otmLogger_5.configure()
+
+loadComponent("IRp6otmLogger_6","Logger")
+IRp6otmLogger_6.loadService("rosparam")
+IRp6otmLogger_6.rosparam.getAll()
+IRp6otmLogger_6.configure()
+
+loadComponent("IRp6ottfgLogger","Logger")
+IRp6ottfgLogger.loadService("rosparam")
+IRp6ottfgLogger.rosparam.getAll()
+IRp6ottfgLogger.configure()
 
 
 // Irp6otm double port spliter
@@ -447,13 +494,69 @@ connect("Irp6ottfgRegulator.SynchroStateIn","Irp6otHardwareInterface.IsSynchroni
 connect("Irp6ottfgRegulator.EmergencyStopOut","Irp6otHardwareInterface.EmergencyStopIn", ConnPolicy())
 
 
+
+connect("IRp6otmLogger_0.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_0", ConnPolicy())
+connect("IRp6otmLogger_0.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_0", ConnPolicy())
+connect("IRp6otmLogger_0.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_0", ConnPolicy())
+connect("IRp6otmLogger_0.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_0", ConnPolicy())
+connect("IRp6otmLogger_0.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_0.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_1.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_1", ConnPolicy())
+connect("IRp6otmLogger_1.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_1", ConnPolicy())
+connect("IRp6otmLogger_1.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_1", ConnPolicy())
+connect("IRp6otmLogger_1.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_1", ConnPolicy())
+connect("IRp6otmLogger_1.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_1.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_2.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_2", ConnPolicy())
+connect("IRp6otmLogger_2.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_2", ConnPolicy())
+connect("IRp6otmLogger_2.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_2", ConnPolicy())
+connect("IRp6otmLogger_2.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_2", ConnPolicy())
+connect("IRp6otmLogger_2.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_2.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_3.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_3", ConnPolicy())
+connect("IRp6otmLogger_3.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_3", ConnPolicy())
+connect("IRp6otmLogger_3.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_3", ConnPolicy())
+connect("IRp6otmLogger_3.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_3", ConnPolicy())
+connect("IRp6otmLogger_3.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_3.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_4.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_4", ConnPolicy())
+connect("IRp6otmLogger_4.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_4", ConnPolicy())
+connect("IRp6otmLogger_4.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_4", ConnPolicy())
+connect("IRp6otmLogger_4.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_4", ConnPolicy())
+connect("IRp6otmLogger_4.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_4.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_5.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_5", ConnPolicy())
+connect("IRp6otmLogger_5.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_5", ConnPolicy())
+connect("IRp6otmLogger_5.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_5", ConnPolicy())
+connect("IRp6otmLogger_5.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_5", ConnPolicy())
+connect("IRp6otmLogger_5.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_5.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6otmLogger_6.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6otm_6", ConnPolicy())
+connect("IRp6otmLogger_6.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6otm_6", ConnPolicy())
+connect("IRp6otmLogger_6.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6otm_6", ConnPolicy())
+connect("IRp6otmLogger_6.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6otm_6", ConnPolicy())
+connect("IRp6otmLogger_6.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6otmLogger_6.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+connect("IRp6ottfgLogger.DesiredPositionIn","Irp6otHardwareInterface.DesiredPosition_out_irp6ottfg", ConnPolicy())
+connect("IRp6ottfgLogger.MotorPositionIn","Irp6otHardwareInterface.MotorPosition_irp6ottfg", ConnPolicy())
+connect("IRp6ottfgLogger.MotorIncrementIn","Irp6otHardwareInterface.MotorIncrement_irp6ottfg", ConnPolicy())
+connect("IRp6ottfgLogger.MotorCurrentIn","Irp6otHardwareInterface.MotorCurrent_irp6ottfg", ConnPolicy())
+connect("IRp6ottfgLogger.HardwarePanicIn","Irp6otHardwareInterface.IsHardwarePanic", ConnPolicy())
+connect("IRp6ottfgLogger.SynchroStateIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
+
+
+
 connect("Irp6otmPortDoubleAggregate_hw_p.OutputPort","Irp6otmM2J.MotorPosition", ConnPolicy())
 
 connect("Irp6otmPortDoubleAggregate_hw_p.OutputPort","Irp6otmM2Jdesired.MotorPosition", ConnPolicy())
 connect("Irp6otmPortDoubleAggregate_hw_desired.OutputPort","Irp6otmM2Jdesired.DesiredMotorPosition", ConnPolicy())
-
-
-
 connect("Irp6otmJ2M.MotorPosition", "IRp6otmLimitDetector.InputPort", ConnPolicy())
 
 connect("Irp6ottfgPortDoubleAggregate_hw_p.OutputPort","Irp6ottfgM2J.MotorPosition", ConnPolicy())
@@ -479,6 +582,16 @@ connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_6","IRp6otmRegulator_6.DesiredP
 
 connect("Irp6ottfgPortDoubleSplit_hw_cp.OutputPort_0","Irp6ottfgRegulator.DesiredPosition", ConnPolicy())
 
+
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_0","IRp6otmLogger_0.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_1","IRp6otmLogger_1.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_2","IRp6otmLogger_2.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_3","IRp6otmLogger_3.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_4","IRp6otmLogger_4.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_5","IRp6otmLogger_5.DesiredPositionIn", ConnPolicy())
+connect("Irp6otmPortDoubleSplit_hw_cp.OutputPort_6","IRp6otmLogger_6.DesiredPositionIn", ConnPolicy())
+
+connect("Irp6ottfgPortDoubleSplit_hw_cp.OutputPort_0","IRp6ottfgLogger.DesiredPosition", ConnPolicy())
 
 
 
@@ -549,7 +662,15 @@ addPeer("Irp6otScheme", "IRp6otmRegulator_6");
 
 addPeer("Irp6otScheme", "Irp6ottfgRegulator");
 
+addPeer("Irp6otLogScheme", "IRp6otmLogger_0");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_1");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_2");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_3");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_4");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_5");
+addPeer("Irp6otLogScheme", "IRp6otmLogger_6");
 
+addPeer("Irp6otLogScheme", "IRp6ottfgLogger");
 
 addPeer("Irp6otScheme", "Irp6otmPortDoubleSplit_hw_cp")
 addPeer("Irp6otScheme", "IRp6otmLimitDetector")
@@ -609,6 +730,17 @@ Irp6otScheme.addBlock("IRp6otmRegulator_5")
 Irp6otScheme.addBlock("IRp6otmRegulator_6")
 
 Irp6otScheme.addBlock("Irp6ottfgRegulator")
+
+
+Irp6otLogScheme.addBlock("IRp6otmLogger_0")
+Irp6otLogScheme.addBlock("IRp6otmLogger_1")
+Irp6otLogScheme.addBlock("IRp6otmLogger_2")
+Irp6otLogScheme.addBlock("IRp6otmLogger_3")
+Irp6otLogScheme.addBlock("IRp6otmLogger_4")
+Irp6otLogScheme.addBlock("IRp6otmLogger_5")
+Irp6otLogScheme.addBlock("IRp6otmLogger_6")
+
+Irp6otLogScheme.addBlock("IRp6ottfgLogger")
 
 
 Irp6otScheme.latchConnections("Irp6otHardwareInterface", "IRp6otmRegulator_0", true);
@@ -888,6 +1020,7 @@ stream("Irp6otmForwardKinematic.EndEffectorOutputPose", ros.comm.topic("/irp6ot_
 
 ## Start it
 Irp6otScheme.start()
+Irp6otLogScheme.start()
 
 
 //
@@ -918,6 +1051,14 @@ IRp6otmRegulator_4.start()
 IRp6otmRegulator_5.start()
 IRp6otmRegulator_6.start()
 Irp6ottfgRegulator.start()
+IRp6otmLogger_0.start()
+IRp6otmLogger_1.start()
+IRp6otmLogger_2.start()
+IRp6otmLogger_3.start()
+IRp6otmLogger_4.start()
+IRp6otmLogger_5.start()
+IRp6otmLogger_6.start()
+IRp6ottfgLogger.start()
 Irp6otmPortDoubleSplit_hw_cp.start()
 IRp6otmLimitDetector.start()
 Irp6ottfgPortDoubleSplit_hw_cp.start()
