@@ -146,6 +146,7 @@ connect("SarkofagLogger.HardwarePanicIn","SarkofagHardwareInterface.IsHardwarePa
 connect("SarkofagLogger.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
 
 
+
 connect("SarkofagPortDoubleAggregate_hw_p.OutputPort","SarkofagM2J.MotorPosition", ConnPolicy())
 connect("SarkofagJ2M.MotorPosition", "SarkofagLimitDetector.InputPort", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagHardwareInterface.MotorPositionCommand_sarkofag", ConnPolicy())

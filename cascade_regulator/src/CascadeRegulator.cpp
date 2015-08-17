@@ -231,9 +231,6 @@ int CascadeRegulator::doServo(double step_new, int pos_inc) {
   set_value_new = (1 + a_) * set_value_old - a_ * set_value_very_old
       + b0_ * delta_eint - b1_ * delta_eint_old;
 
-  std::cout << "PWM VALUE (" << position_increment_old << " to " << position_increment_new << ") IS ";
-  std::cout << static_cast<int>(set_value_new) << std::endl;
-
 // ograniczenie na sterowanie
   if (set_value_new > MAX_PWM)
     set_value_new = MAX_PWM;

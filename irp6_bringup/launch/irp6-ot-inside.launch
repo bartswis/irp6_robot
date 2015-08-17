@@ -245,14 +245,14 @@
       IRp6otmLogger_0:
         reg_number: 0
         max_log: 100
-        full_log: true
+        full_log: false
         debug: false
         pre_syn_export: false
         filename: irp6otm_0
       IRp6otmLogger_1:
         reg_number: 1
         max_log: 100
-        full_log: true
+        full_log: false
         debug: false
         pre_syn_export: false
         filename: irp6otm_1

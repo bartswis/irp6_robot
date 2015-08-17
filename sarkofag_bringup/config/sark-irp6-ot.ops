@@ -143,7 +143,7 @@ connect("SarkofagLogger.MotorPositionIn","SarkofagHardwareInterface.MotorPositio
 connect("SarkofagLogger.MotorIncrementIn","SarkofagHardwareInterface.MotorIncrement_irp6otm_1", ConnPolicy())
 connect("SarkofagLogger.MotorCurrentIn","SarkofagHardwareInterface.MotorCurrent_irp6otm_1", ConnPolicy())
 connect("SarkofagLogger.HardwarePanicIn","SarkofagHardwareInterface.IsHardwarePanic", ConnPolicy())
-connect("SarkofagLogger.EmergencyStopOut","SarkofagHardwareInterface.EmergencyStopIn", ConnPolicy())
+connect("SarkofagLogger.SynchroStateIn","SarkofagHardwareInterface.IsSynchronised", ConnPolicy())
 
 
 
