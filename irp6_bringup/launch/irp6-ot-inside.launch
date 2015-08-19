@@ -165,6 +165,23 @@
         max_output_current: 22000.0
         max_desired_increment: 200.0
         enc_res: 4000.0
+      IRp6otmCasRegulator_1:
+        debug: false
+        eint_dif: 0.01
+        A: 0.412429378531
+        BB0: 1.5569592
+        BB1: 1.5028614
+        current_mode: true
+        current_reg_kp: 200.0
+        max_output_current: 20000.0
+        max_desired_increment: 200.0
+        enc_res: 4000.0
+        KP_POS: 70.192956603420160
+        TI_POS: 55.596393636733175
+        TD_POS: 0.035989704864648
+        KP_INC: 0.974840619098408
+        TI_INC: 400.5711440731510
+        TD_INC: 0.001306555463708
       IRp6otmRegulator_1:
         debug: false
         eint_dif: 0.01
