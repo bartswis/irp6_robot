@@ -58,6 +58,7 @@ class Logger : public RTT::TaskContext {
   void panic_write();
 
   RTT::InputPort<double> port_desired_position_;
+  RTT::InputPort<double> port_desired_velocity_;
   RTT::InputPort<double> port_motor_position_;
   RTT::InputPort<double> port_motor_increment_;
   RTT::InputPort<double> port_motor_current_;
@@ -65,7 +66,8 @@ class Logger : public RTT::TaskContext {
   RTT::InputPort<bool> hardware_panic_in_;
   RTT::InputPort<bool> synchro_state_in_;
 
-  double desiredData;
+  double desiredPosData;
+  double desiredVelData;
   double positionData;
   double incrementData;
   double currentData;

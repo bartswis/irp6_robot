@@ -38,18 +38,21 @@ const int MAX_PWM = 190;
 Logger::Logger(const std::string& name)
 : TaskContext(name),
   port_desired_position_("DesiredPositionIn"),
+  port_desired_velocity_("DesiredVelocityIn"),
   port_motor_position_("MotorPositionIn"),
   port_motor_increment_("MotorIncrementIn"),
   port_motor_current_("MotorCurrentIn"),
   hardware_panic_in_("HardwarePanicIn"),
   synchro_state_in_("SynchroStateIn"),
-  desiredData(0.0),
+  desiredPosData(0.0),
+  desiredVelData(0.0),
   positionData(0.0),
   incrementData(0.0),
   currentData(0.0),
   log(0),
   writed(false)  {
   this->addEventPort(port_desired_position_).doc("");
+  this->addPort(port_desired_velocity_).doc("");
   this->addPort(port_motor_position_).doc("");
   this->addPort(port_motor_increment_).doc("");
   this->addPort(port_motor_current_).doc("");
@@ -96,7 +99,8 @@ bool Logger::configureHook() {
     file.open((filename + ".csv").c_str());
 
     file << reg_number_ << "_time;";
-    file << reg_number_ << "_desired;";
+    file << reg_number_ << "_pos_desired;";
+    file << reg_number_ << "_vel_desired;";
     file << reg_number_ << "_position;";
     file << reg_number_ << "_increment;";
     file << reg_number_ << "_current;";
@@ -121,7 +125,10 @@ void Logger::updateHook() {
     // std::cout << "hardware_panic " << hardware_panic  << std::endl;
   }
 
-  if (RTT::NewData == port_desired_position_.read(desiredData)) {
+  if (RTT::NewData == port_desired_position_.read(desiredPosData)) {
+    // std::cout << "  desired: " << desiredData;
+  }
+  if (RTT::NewData == port_desired_velocity_.read(desiredVelData)) {
     // std::cout << "  desired: " << desiredData;
   }
   if (RTT::NewData == port_motor_position_.read(positionData)) {
@@ -141,13 +148,14 @@ void Logger::updateHook() {
   int64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
 
   std::ostringstream output;
-  output << ms << ";" << desiredData << ";" << positionData << ";"
+  output << ms << ";" << desiredPosData << ";" << desiredVelData << ";" << positionData << ";"
       << incrementData << ";" << currentData << ";\n";
 
   if (debug_) {
     std::cout << log;
     std::cout << "  time: " << ms;
-    std::cout << "  desired: " << desiredData;
+    std::cout << "  desired_pos: " << desiredPosData;
+    std::cout << "  desired_vel: " << desiredVelData;
     std::cout << "  position: " << positionData;
     std::cout << "  increment: " << incrementData;
     std::cout << "  current: " << currentData;
@@ -173,7 +181,7 @@ void Logger::write() {
   int64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
 
   std::ostringstream output;
-  output << ms << ";" << desiredData << ";" << positionData << ";"
+  output << ms << ";" << desiredPosData << ";" << desiredVelData << ";" << positionData << ";"
       << incrementData << ";" << currentData << ";\n";
   file << output.str();
 }

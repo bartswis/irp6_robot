@@ -165,7 +165,7 @@ void CascadeRegulator::updateHook() {
 
     if (RTT::NewData == synchro_state_in_.read(synchro_state_new_)) {
       if (synchro_state_new_ != synchro_state_old_) {
-        desired_position_old_ = desired_position_new_;
+        desired_position_old_ = desired_position_new_ = measured_position_new_;
         measured_position_old_ = measured_position_new_;
         synchro_state_old_ = synchro_state_new_;
         reset();

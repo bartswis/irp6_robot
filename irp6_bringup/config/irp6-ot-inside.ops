@@ -1059,7 +1059,7 @@ Irp6ottfgPortDoubleSum.start()
 
 
 IRp6otmRegulator_0.start()
-IRp6otmRegulator_1.start()
+IRp6otmCasRegulator_1.start()
 IRp6otmRegulator_2.start()
 IRp6otmRegulator_3.start()
 IRp6otmRegulator_4.start()

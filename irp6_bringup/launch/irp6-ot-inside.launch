@@ -269,7 +269,7 @@
       IRp6otmLogger_1:
         reg_number: 1
         max_log: 100
-        full_log: false
+        full_log: true
         debug: false
         pre_syn_export: false
         filename: irp6otm_1
