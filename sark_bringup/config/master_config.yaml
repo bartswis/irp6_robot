@@ -1,0 +1,160 @@
+master_idx: 0
+terminals:
+ - name: irp6otm_1
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 2
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1602
+      entries:
+       - index: 0x6071
+         subindex: 0
+         bit_length: 16
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+ - name: irp6otm_2
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 0
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1602
+      entries:
+       - index: 0x6071
+         subindex: 0
+         bit_length: 16
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+ - name: irp6otm_3
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 1
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1602
+      entries:
+       - index: 0x6071
+         subindex: 0
+         bit_length: 16
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+domains:
+ - name: main
+   period: 1
+   drivers:
+    - name: irp6otm_1
+      type: elmo_driver
+      terminal: irp6otm_1
+      interpolation_period:
+        value: 1
+        index: -3
+      homing:
+        mode: 19
+        speed_high: 3000
+        speed_low: 1500
+        acceleration: 1000000
+      control_mode: current
+    - name: irp6otm_2
+      type: elmo_driver
+      terminal: irp6otm_2
+      interpolation_period:
+        value: 1
+        index: -3
+      homing:
+        mode: 19
+        speed_high: 3000
+        speed_low: 1500
+        acceleration: 1000000
+      control_mode: current
+    - name: irp6otm_3
+      type: elmo_driver
+      terminal: irp6otm_3
+      interpolation_period:
+        value: 1
+        index: -3
+      homing:
+        mode: 19
+        speed_high: 3000
+        speed_low: 1500
+        acceleration: 1000000
+      control_mode: current
+
