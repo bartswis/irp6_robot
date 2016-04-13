@@ -14,16 +14,21 @@ EC.configure();
 
 runScript( ros.find("sark_bringup") + "/config/sark_inside_p1.ops")
 
-connect("EC.irp6otm_1.motor_current_command","SarkofagRegulator.computedPwm_out", ConnPolicy())
+connect("EC.irp6otm_1.motor_current_command","SarkofagRegulator1.computedPwm_out", ConnPolicy())
 connect("SarkofagPortDoubleAggregate_im2rm.InputPort_0","EC.irp6otm_1.motor_position", ConnPolicy())
-connect("SarkofagRegulator.MeasuredPosition","EC.irp6otm_1.motor_position", ConnPolicy())
+connect("SarkofagRegulator1.MeasuredPosition","EC.irp6otm_1.motor_position", ConnPolicy())
+connect("EC.irp6otm_2.motor_current_command","SarkofagRegulator2.computedPwm_out", ConnPolicy())
+connect("SarkofagPortDoubleAggregate_im2rm.InputPort_1","EC.irp6otm_2.motor_position", ConnPolicy())
+connect("SarkofagRegulator2.MeasuredPosition","EC.irp6otm_2.motor_position", ConnPolicy())
 
 addPeer("ECManager", "EC");
 
 
 
-addPeer("SarkScheme", "SarkofagRegulator");
-SarkScheme.addBlock("SarkofagRegulator")
+addPeer("SarkScheme", "SarkofagRegulator1");
+SarkScheme.addBlock("SarkofagRegulator1")
+addPeer("SarkScheme", "SarkofagRegulator2");
+SarkScheme.addBlock("SarkofagRegulator2")
 
 
 runScript( ros.find("sark_bringup") + "/config/sark_inside_p2.ops")

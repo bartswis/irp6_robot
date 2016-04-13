@@ -88,7 +88,6 @@ SarkofagJntPub.configure()
 
 SarkScheme.start()
 
-//SarkofagRegulator.start()
 SarkofagPortDoubleSplit_hw_cp.start()
 SarkofagPortDoubleSplit_hw_to_reg.start()
 SarkofagLimitDetector.start()
