@@ -53,6 +53,10 @@ loadComponent("SarkofagRegulator2","SarkRegulator")
 SarkofagRegulator2.loadService("rosparam")
 SarkofagRegulator2.rosparam.getAll()
 SarkofagRegulator2.configure()
+loadComponent("SarkofagRegulator3","SarkRegulator")
+SarkofagRegulator3.loadService("rosparam")
+SarkofagRegulator3.rosparam.getAll()
+SarkofagRegulator3.configure()
 
 
 // Sarkofag double port spliter
@@ -112,5 +116,6 @@ connect("SarkofagIM2RM.RadianMotorPosition","SarkofagM2J.MotorPosition", ConnPol
 connect("SarkofagJ2M.MotorPosition", "SarkofagLimitDetector.InputPort", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_0","SarkofagRegulator1.DesiredPosition", ConnPolicy())
 connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_1","SarkofagRegulator2.DesiredPosition", ConnPolicy())
+connect("SarkofagPortDoubleSplit_hw_cp.OutputPort_2","SarkofagRegulator3.DesiredPosition", ConnPolicy())
 
 
